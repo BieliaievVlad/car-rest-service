@@ -9,4 +9,5 @@ import com.foxminded.tasks.car_rest_service.entity.Car;
 @Repository
 public interface CarRepository extends JpaRepository<Car, Long>, JpaSpecificationExecutor<Car> {
 
+	boolean existsByObjectId(String objectId);
 }

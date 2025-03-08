@@ -6,10 +6,14 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
+import com.foxminded.tasks.car_rest_service.specification.CategorySpecification;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -79,6 +83,23 @@ public class CategoryService {
 			logger.error("ID: {}", category.getId());
 			logger.error("Name: {}", category.getName());
 		}
+	}
+	
+	public Category findByNameOrSaveNew(String name) {
+		
+		return categoryRepository.findByName(name)
+				.orElseGet(() -> categoryRepository.save(new Category(name)));
+	}
+	
+	public Page<Category> filterCategories(String name, Pageable pageable) {
+		
+		if(name == null || name.isEmpty()) {
+			name = null;
+		}
+		
+		Specification<Category> specification = Specification.where(CategorySpecification.filterByName(name));
+		
+		return categoryRepository.findAll(specification, pageable);
 	}
 	
 	private boolean isCategoryValid(Category category) {
