@@ -12,5 +12,6 @@ import com.foxminded.tasks.car_rest_service.entity.Model;
 public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecificationExecutor<Model> {
 	
 	Optional<Model> findByName(String name);
+	boolean existsByName(String name);
 
 }

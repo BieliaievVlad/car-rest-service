@@ -18,17 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.service.CarService;
-import com.foxminded.tasks.car_rest_service.service.PersistenceService;
+import com.foxminded.tasks.car_rest_service.service.DataManagementService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/api/v1")
 public class CarController {
 
     private final CarService carService;
-    private final PersistenceService service;
+    private final DataManagementService service;
 
     @Autowired
-    public CarController(CarService carService, PersistenceService service) {
+    public CarController(CarService carService, DataManagementService service) {
         this.carService = carService;
         this.service = service;
     }
@@ -47,8 +49,18 @@ public class CarController {
     }
     
     @GetMapping("/cars/{id}")
-    public Car getCar(@PathVariable Long id) {
-    	return carService.findById(id);
+    public ResponseEntity<Car> getCar(@PathVariable Long id) {
+    	
+    	try {
+    		Car car = carService.findById(id);
+    		return new ResponseEntity<>(car, HttpStatus.OK);
+    		
+    	} catch (EntityNotFoundException e){	
+    		return new ResponseEntity<>(HttpStatus.NOT_FOUND); 
+    		
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
     }
     
 	@PostMapping("/cars")
@@ -58,8 +70,11 @@ public class CarController {
 			Car newCar = service.createCar(car);
 			return new ResponseEntity<>(newCar, HttpStatus.CREATED);
 			
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -71,8 +86,11 @@ public class CarController {
 			service.deleteCarById(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

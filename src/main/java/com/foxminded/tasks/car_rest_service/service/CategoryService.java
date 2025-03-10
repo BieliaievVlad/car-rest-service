@@ -33,56 +33,46 @@ public class CategoryService {
 	}
 	
 	public Category findById(Long id) {
-		
-		try {
-			
-			Optional<Category> optCategory = categoryRepository.findById(id);
-			
-			if(optCategory.isPresent()) {
-				return optCategory.get();
-				
-			} else {
-				throw new EntityNotFoundException();
-			}
-		} catch (Exception e) {
+
+		Optional<Category> optCategory = categoryRepository.findById(id);
+
+		if (optCategory.isPresent()) {
+			return optCategory.get();
+
+		} else {
 			logger.error("Category with id {} is not found.", id);
-			return new Category();
+			throw new EntityNotFoundException();
 		}
+
 	}
 	
-	public void save(Category category) {
-		
-		try {
-			
-			if(!isCategoryValid(category)) {
-				throw new IllegalArgumentException();
-				
-			} else {
-				categoryRepository.save(category);
-			}
-			
-		} catch (Exception e) {
+	public Category save(Category category) {
+
+		if (!isCategoryValid(category)) {
 			logger.error("Save error. Category is not valid.");
-			logger.error("Name: {}", category.getName());
+			throw new IllegalArgumentException();
+
+		} else {
+			return categoryRepository.save(category);
 		}
+
 	}
 	
 	public void delete(Category category) {
-		
-		try {
-			
-			if(!isCategoryValid(category)) {
-				throw new IllegalArgumentException();
-				
-			} else {
-				categoryRepository.delete(category);
-			}
-			
-		} catch (Exception e) {
+
+		if (!isCategoryValid(category)) {
 			logger.error("Delete error. Category is not valid.");
-			logger.error("ID: {}", category.getId());
-			logger.error("Name: {}", category.getName());
+			throw new IllegalArgumentException();
+
+		} else {
+			categoryRepository.delete(category);
 		}
+
+	}
+	
+	public boolean existsByName(String name) {
+		
+		return categoryRepository.existsByName(name);
 	}
 	
 	public Category findByNameOrSaveNew(String name) {

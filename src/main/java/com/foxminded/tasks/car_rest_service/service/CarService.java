@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.foxminded.tasks.car_rest_service.entity.Car;
+import com.foxminded.tasks.car_rest_service.entity.Category;
+import com.foxminded.tasks.car_rest_service.entity.Make;
+import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.repository.CarRepository;
 import com.foxminded.tasks.car_rest_service.specification.CarSpecification;
 
@@ -46,7 +49,6 @@ public class CarService {
 			throw new EntityNotFoundException();
 
 		}
-
 	}
 
 	public Car save(Car car) {
@@ -92,6 +94,18 @@ public class CarService {
 														.and(CarSpecification.filterByYear(year));
 
 		return carRepository.findAll(specification, pageable);
+	}
+	
+	public List<Car> findByMake(Make make) {
+		return carRepository.findByMake(make);
+	}
+	
+	public List<Car> findByModel(Model model) {
+		return carRepository.findByModel(model);
+	}
+	
+	public List<Car> findByCategory(Category category) {
+		return carRepository.findByCategory(category);
 	}
 	
 	public String generateObjectId() {

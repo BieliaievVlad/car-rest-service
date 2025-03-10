@@ -12,5 +12,6 @@ import com.foxminded.tasks.car_rest_service.entity.Category;
 public interface CategoryRepository extends JpaRepository<Category, Long>, JpaSpecificationExecutor<Category> {
 	
 	Optional<Category> findByName(String name);
+	boolean existsByName(String name);
 
 }

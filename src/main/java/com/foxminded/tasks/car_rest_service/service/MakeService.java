@@ -70,6 +70,11 @@ public class MakeService {
 
 	}
 	
+	public boolean existsByName(String name) {
+		
+		return makeRepository.existsByName(name);
+	}
+	
 	public Make findByNameOrSaveNew(String name) {
 		
 		return makeRepository.findByName(name)

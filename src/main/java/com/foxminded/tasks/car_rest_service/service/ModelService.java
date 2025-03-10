@@ -33,54 +33,46 @@ public class ModelService {
 	}
 	
 	public Model findById(Long id) {
-		
-		try {
-			
-			Optional<Model> optModel = modelRepository.findById(id);
-			
-			if(optModel.isPresent()) {
-				return optModel.get();
-				
-			} else {
-				throw new EntityNotFoundException();
-			}
-		} catch (Exception e) {
+
+		Optional<Model> optModel = modelRepository.findById(id);
+
+		if (optModel.isPresent()) {
+			return optModel.get();
+
+		} else {
 			logger.error("Model with id {} is not found.", id);
-			return new Model();
+			throw new EntityNotFoundException();
 		}
+
 	}
 	
-	public void save(Model model) {
-		
-		try {
-			
-			if(!isModelValid(model)) {
-				throw new IllegalArgumentException();
-				
-			} else {
-				modelRepository.save(model);
-			}
-		} catch (Exception e) {
+	public Model save(Model model) {
+
+		if (!isModelValid(model)) {
 			logger.error("Save error. Model is not valid.");
-			logger.error("Name: {}", model.getName());
+			throw new IllegalArgumentException();
+
+		} else {
+			return modelRepository.save(model);
 		}
+
 	}
 	
 	public void delete(Model model) {
-		
-		try {
-			
-			if(!isModelValid(model)) {
-				throw new IllegalArgumentException();
-				
-			} else {
-				modelRepository.delete(model);
-			}
-		} catch (Exception e) {
+
+		if (!isModelValid(model)) {
 			logger.error("Delete error. Model is not valid.");
-			logger.error("ID: {}", model.getId());
-			logger.error("Name: {}", model.getName());
+			throw new IllegalArgumentException();
+
+		} else {
+			modelRepository.delete(model);
 		}
+
+	}
+	
+	public boolean existsByName(String name) {
+		
+		return modelRepository.existsByName(name);
 	}
 	
 	public Model findByNameOrSaveNew(String name) {

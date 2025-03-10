@@ -12,5 +12,6 @@ import com.foxminded.tasks.car_rest_service.entity.Make;
 public interface MakeRepository extends JpaRepository<Make, Long>, JpaSpecificationExecutor<Make> {
 	
 	Optional<Make> findByName(String name);
+	boolean existsByName(String name);
 
 }
