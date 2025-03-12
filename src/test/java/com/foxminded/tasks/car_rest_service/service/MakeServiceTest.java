@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.repository.MakeRepository;
