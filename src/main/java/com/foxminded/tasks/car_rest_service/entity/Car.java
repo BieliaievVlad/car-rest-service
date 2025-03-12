@@ -2,6 +2,8 @@ package com.foxminded.tasks.car_rest_service.entity;
 
 import java.time.Year;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,20 +31,25 @@ public class Car {
 	
 	@ManyToOne
 	@JoinColumn(name = "make_id", nullable = false)
+	@JsonProperty("make")
 	private Make make;
 	
 	@ManyToOne
 	@JoinColumn(name = "model_id", nullable = false)
+	@JsonProperty("model")
 	private Model model;
 	
 	@ManyToOne
 	@JoinColumn(name = "category_id", nullable = false)
+	@JsonProperty("category")
 	private Category category;
 	
 	@Column(name = "year", nullable = false)
+	@JsonProperty("year")
 	private Year year;
 	
 	@Column(name = "objectId", nullable = false)
+	@JsonProperty("objectId")
 	private String objectId;
 	
 	public Car(Make make, Model model, Category category, Year year, String objectId) {

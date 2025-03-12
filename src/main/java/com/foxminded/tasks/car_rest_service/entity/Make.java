@@ -1,5 +1,7 @@
 package com.foxminded.tasks.car_rest_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,6 +26,7 @@ public class Make {
 	private Long id;
 	
 	@Column(name = "name", nullable = false)
+	@JsonProperty("name")
 	private String name;
 
 	public Make(String name) {

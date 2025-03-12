@@ -44,7 +44,7 @@ public class ModelController {
         return modelService.filterModels(name, pageable);
 	}	
 	
-	@GetMapping("/model/{id}")
+	@GetMapping("/models/{id}")
 	public ResponseEntity<Model> getModel(@PathVariable Long id) {
 		
 		try {
