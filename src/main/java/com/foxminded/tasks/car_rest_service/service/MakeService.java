@@ -2,16 +2,20 @@ package com.foxminded.tasks.car_rest_service.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
 import com.foxminded.tasks.car_rest_service.entity.Make;
+import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
 import com.foxminded.tasks.car_rest_service.repository.MakeRepository;
 import com.foxminded.tasks.car_rest_service.specification.MakeSpecification;
 
@@ -21,23 +25,28 @@ import jakarta.persistence.EntityNotFoundException;
 public class MakeService {
 	
 	private final MakeRepository makeRepository;
+	private final MakeMapper mapper;
 	Logger logger = LoggerFactory.getLogger(MakeService.class);
 	
 	@Autowired
-	public MakeService(MakeRepository makeRepository) {
+	public MakeService(MakeRepository makeRepository, MakeMapper makeMapper) {
 		this.makeRepository = makeRepository;
+		this.mapper = makeMapper;
 	}
 	
-	public List<Make> findAll() {
-		return makeRepository.findAll();
+	public List<MakeDTO> findAll() {
+		
+		return makeRepository.findAll().stream()
+				.map(mapper :: makeToDto)
+				.collect(Collectors.toList());
 	}
 	
-	public Make findById(Long id) {
+	public MakeDTO findById(Long id) {
 
 		Optional<Make> optMake = makeRepository.findById(id);
 
 		if (optMake.isPresent()) {
-			return optMake.get();
+			return mapper.makeToDto(optMake.get());
 
 		} else {
 			logger.error("Make with id {} is not found.", id);
@@ -46,8 +55,10 @@ public class MakeService {
 
 	}
 	
-	public Make save(Make make) {
+	public Make save(MakeDTO makeDto) {
 
+		Make make = mapper.dtoToMake(makeDto);
+		
 		if (!isMakeValid(make)) {
 			logger.error("Save error. Make is not valid.");
 			throw new IllegalArgumentException();
@@ -58,8 +69,10 @@ public class MakeService {
 
 	}
 	
-	public void delete(Make make) {
+	public void delete(MakeDTO makeDto) {
 
+		Make make = mapper.dtoToMake(makeDto);
+		
 		if (!isMakeValid(make)) {
 			logger.error("Delete error. Make is not valid.");
 			throw new IllegalArgumentException();
@@ -81,7 +94,7 @@ public class MakeService {
 				.orElseGet(() -> makeRepository.save(new Make(name)));		
 	}
 	
-	public Page<Make> filterMakes(String name, Pageable pageable) {
+	public Page<MakeDTO> filterMakes(String name, Pageable pageable) {
 		
 		if (name == null || name.isEmpty()) {
 			name = null;
@@ -89,7 +102,13 @@ public class MakeService {
 		
 		Specification<Make> specification = Specification.where(MakeSpecification.filterByName(name));
 		
-		return makeRepository.findAll(specification, pageable);
+		Page<Make> makesPage = makeRepository.findAll(specification, pageable);
+		
+		List<MakeDTO> makesDto = makesPage.getContent().stream()
+				.map(mapper::makeToDto)
+				.collect(Collectors.toList());
+			
+		return new PageImpl<>(makesDto, pageable, makesPage.getTotalElements());
 	}
 	
 	private boolean isMakeValid(Make make) {

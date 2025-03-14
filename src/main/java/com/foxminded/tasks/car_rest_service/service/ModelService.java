@@ -2,16 +2,20 @@ package com.foxminded.tasks.car_rest_service.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
 import com.foxminded.tasks.car_rest_service.specification.ModelSpecification;
 
@@ -21,23 +25,28 @@ import jakarta.persistence.EntityNotFoundException;
 public class ModelService {
 	
 	private final ModelRepository modelRepository;
+	private final ModelMapper mapper;
 	Logger logger = LoggerFactory.getLogger(ModelService.class);
 	
 	@Autowired
-	public ModelService(ModelRepository modelRepository) {
+	public ModelService(ModelRepository modelRepository, ModelMapper mapper) {
 		this.modelRepository = modelRepository;
+		this.mapper = mapper;
 	}
 	
-	public List<Model> findAll() {
-		return modelRepository.findAll();
+	public List<ModelDTO> findAll() {
+		
+		return modelRepository.findAll().stream()
+				.map(mapper :: modelToDto)
+				.collect(Collectors.toList());
 	}
 	
-	public Model findById(Long id) {
+	public ModelDTO findById(Long id) {
 
 		Optional<Model> optModel = modelRepository.findById(id);
 
 		if (optModel.isPresent()) {
-			return optModel.get();
+			return mapper.modelToDto(optModel.get());
 
 		} else {
 			logger.error("Model with id {} is not found.", id);
@@ -46,8 +55,10 @@ public class ModelService {
 
 	}
 	
-	public Model save(Model model) {
+	public Model save(ModelDTO modelDto) {
 
+		Model model = mapper.dtoToModel(modelDto);
+		
 		if (!isModelValid(model)) {
 			logger.error("Save error. Model is not valid.");
 			throw new IllegalArgumentException();
@@ -58,8 +69,10 @@ public class ModelService {
 
 	}
 	
-	public void delete(Model model) {
+	public void delete(ModelDTO modelDto) {
 
+		Model model = mapper.dtoToModel(modelDto);
+		
 		if (!isModelValid(model)) {
 			logger.error("Delete error. Model is not valid.");
 			throw new IllegalArgumentException();
@@ -81,7 +94,7 @@ public class ModelService {
 				.orElseGet(() -> modelRepository.save(new Model(name)));
 	}
 	
-	public Page<Model> filterModels (String name, Pageable pageable) {
+	public Page<ModelDTO> filterModels (String name, Pageable pageable) {
 		
 		if (name == null || name.isEmpty()) {
 			name = null;
@@ -89,7 +102,13 @@ public class ModelService {
 		
 		Specification<Model> specification = Specification.where(ModelSpecification.filterByName(name));
 		
-		return modelRepository.findAll(specification, pageable);
+		Page<Model> modelsPage = modelRepository.findAll(specification, pageable);
+		
+		List<ModelDTO> modelsDto = modelsPage.getContent().stream()
+				.map(mapper :: modelToDto)
+				.collect(Collectors.toList());
+		
+		return new PageImpl<>(modelsDto, pageable, modelsPage.getTotalElements());
 	}
 	
 	private boolean isModelValid(Model model) {

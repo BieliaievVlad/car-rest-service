@@ -8,10 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.foxminded.tasks.car_rest_service.dto.CarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.mapper.CarMapper;
+import com.foxminded.tasks.car_rest_service.repository.MakeRepository;
 
 @Service
 public class DataManagementService {
@@ -20,17 +23,20 @@ public class DataManagementService {
 	private MakeService makeService;
 	private ModelService modelService;
 	private CategoryService categoryService;
+	private CarMapper carMapper;
 	Logger logger = LoggerFactory.getLogger(DataManagementService.class);
 	
 	@Autowired
 	public DataManagementService(CarService carService,
 							  MakeService makeService,
 							  ModelService modelService,
-							  CategoryService categoryService) {
+							  CategoryService categoryService,
+							  CarMapper carMapper) {
 		this.carService = carService;
 		this.makeService = makeService;
 		this.modelService = modelService;
 		this.categoryService = categoryService;
+		this.carMapper = carMapper;
 	}
 	
 	public void deleteCarById(Long id) {
@@ -122,6 +128,15 @@ public class DataManagementService {
 		}
 		
 		categoryService.delete(category);
+	}
+	
+	public Car dtoToCar(CarDTO carDto) {
+		
+		Make make = makeService.findByNameOrSaveNew(carDto.getMake());
+		Model model = modelService.findByNameOrSaveNew(carDto.getModel());
+		Category category = categoryService.findByNameOrSaveNew(carDto.getCategory());
+		
+		return carMapper.dtoToCar(carDto, make, model, category);
 	}
 
 }

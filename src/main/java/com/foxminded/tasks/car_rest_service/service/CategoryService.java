@@ -2,16 +2,20 @@ package com.foxminded.tasks.car_rest_service.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.entity.Category;
+import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
 import com.foxminded.tasks.car_rest_service.specification.CategorySpecification;
 
@@ -21,23 +25,27 @@ import jakarta.persistence.EntityNotFoundException;
 public class CategoryService {
 	
 	private final CategoryRepository categoryRepository;
+	private final CategoryMapper mapper;
 	Logger logger = LoggerFactory.getLogger(CategoryService.class);
 	
 	@Autowired
-	public CategoryService(CategoryRepository categoryRepository) {
+	public CategoryService(CategoryRepository categoryRepository, CategoryMapper mapper) {
 		this.categoryRepository = categoryRepository;
+		this.mapper = mapper;
 	}
 	
-	public List<Category> findAll() {
-		return categoryRepository.findAll();
+	public List<CategoryDTO> findAll() {
+		return categoryRepository.findAll().stream()
+				.map(mapper :: categoryToDto)
+				.collect(Collectors.toList());
 	}
 	
-	public Category findById(Long id) {
+	public CategoryDTO findById(Long id) {
 
 		Optional<Category> optCategory = categoryRepository.findById(id);
 
 		if (optCategory.isPresent()) {
-			return optCategory.get();
+			return mapper.categoryToDto(optCategory.get());
 
 		} else {
 			logger.error("Category with id {} is not found.", id);
@@ -46,7 +54,9 @@ public class CategoryService {
 
 	}
 	
-	public Category save(Category category) {
+	public Category save(CategoryDTO categoryDto) {
+		
+		Category category = mapper.dtoToCategory(categoryDto);
 
 		if (!isCategoryValid(category)) {
 			logger.error("Save error. Category is not valid.");
@@ -58,7 +68,9 @@ public class CategoryService {
 
 	}
 	
-	public void delete(Category category) {
+	public void delete(CategoryDTO categoryDto) {
+		
+		Category category = mapper.dtoToCategory(categoryDto);
 
 		if (!isCategoryValid(category)) {
 			logger.error("Delete error. Category is not valid.");
@@ -81,7 +93,7 @@ public class CategoryService {
 				.orElseGet(() -> categoryRepository.save(new Category(name)));
 	}
 	
-	public Page<Category> filterCategories(String name, Pageable pageable) {
+	public Page<CategoryDTO> filterCategories(String name, Pageable pageable) {
 		
 		if(name == null || name.isEmpty()) {
 			name = null;
@@ -89,7 +101,13 @@ public class CategoryService {
 		
 		Specification<Category> specification = Specification.where(CategorySpecification.filterByName(name));
 		
-		return categoryRepository.findAll(specification, pageable);
+		Page<Category> categoriesPage = categoryRepository.findAll(specification, pageable);
+		
+		List<CategoryDTO> categoriesDto = categoriesPage.getContent().stream()
+				.map(mapper :: categoryToDto)
+				.collect(Collectors.toList());
+		
+		return new PageImpl<>(categoriesDto, pageable, categoriesPage.getTotalElements());
 	}
 	
 	private boolean isCategoryValid(Category category) {

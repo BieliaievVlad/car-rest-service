@@ -1,5 +1,6 @@
 package com.foxminded.tasks.car_rest_service.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -13,10 +14,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
+import com.foxminded.tasks.car_rest_service.dto.CarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.mapper.CarMapper;
 import com.foxminded.tasks.car_rest_service.repository.CarRepository;
 import com.foxminded.tasks.car_rest_service.specification.CarSpecification;
 
@@ -26,23 +29,33 @@ import jakarta.persistence.EntityNotFoundException;
 public class CarService {
 
 	private final CarRepository carRepository;
+	private final CarMapper mapper;
 	Logger logger = LoggerFactory.getLogger(CarService.class);
 
 	@Autowired
-	public CarService(CarRepository carRepository) {
+	public CarService(CarRepository carRepository, CarMapper carMapper) {
 		this.carRepository = carRepository;
+		this.mapper = carMapper;
 	}
 
-	public List<Car> findAll() {
-		return carRepository.findAll();
+	public List<CarDTO> findAll() {
+		
+		List<Car> cars = carRepository.findAll();
+		List<CarDTO> carsDto = new ArrayList<>();
+		
+		for(Car c : cars) {
+			CarDTO carDto = mapper.carToDto(c);
+			carsDto.add(carDto);
+		}
+		return carsDto;
 	}
 
-	public Car findById(Long id) {
+	public CarDTO findById(Long id) {
 
 		Optional<Car> optCar = carRepository.findById(id);
 
 		if (optCar.isPresent()) {
-			return optCar.get();
+			return mapper.carToDto(optCar.get());
 
 		} else {
 			logger.error("Car with id {} is not found.", id);
