@@ -34,19 +34,16 @@ public class MakeService {
 		this.mapper = makeMapper;
 	}
 	
-	public List<MakeDTO> findAll() {
-		
-		return makeRepository.findAll().stream()
-				.map(mapper :: makeToDto)
-				.collect(Collectors.toList());
+	public List<Make> findAll() {
+		return makeRepository.findAll();
 	}
 	
-	public MakeDTO findById(Long id) {
+	public Make findById(Long id) {
 
 		Optional<Make> optMake = makeRepository.findById(id);
 
 		if (optMake.isPresent()) {
-			return mapper.makeToDto(optMake.get());
+			return optMake.get();
 
 		} else {
 			logger.error("Make with id {} is not found.", id);
@@ -55,9 +52,7 @@ public class MakeService {
 
 	}
 	
-	public Make save(MakeDTO makeDto) {
-
-		Make make = mapper.dtoToMake(makeDto);
+	public Make save(Make make) {
 		
 		if (!isMakeValid(make)) {
 			logger.error("Save error. Make is not valid.");
@@ -69,9 +64,7 @@ public class MakeService {
 
 	}
 	
-	public void delete(MakeDTO makeDto) {
-
-		Make make = mapper.dtoToMake(makeDto);
+	public void delete(Make make) {
 		
 		if (!isMakeValid(make)) {
 			logger.error("Delete error. Make is not valid.");
@@ -80,7 +73,6 @@ public class MakeService {
 		} else {
 			makeRepository.delete(make);
 		}
-
 	}
 	
 	public boolean existsByName(String name) {
@@ -116,5 +108,4 @@ public class MakeService {
 		return make != null &&
 			   make.getName() != null;
 	}
-
 }

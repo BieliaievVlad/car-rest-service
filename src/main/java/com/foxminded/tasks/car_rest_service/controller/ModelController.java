@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
 import com.foxminded.tasks.car_rest_service.service.ModelService;
 import com.foxminded.tasks.car_rest_service.service.DataManagementService;
 
@@ -36,20 +36,20 @@ public class ModelController {
 	}
 	
 	@GetMapping("/models")
-	public Page<Model> getFilteredModels(@RequestParam(required = false) String name,
-										 @RequestParam(defaultValue = "0") int page,
-										 @RequestParam(defaultValue = "10") int size) {
+	public Page<ModelDTO> getFilteredModels(@RequestParam(required = false) String name,
+										    @RequestParam(defaultValue = "0") int page,
+										    @RequestParam(defaultValue = "10") int size) {
 		
     	Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("id")));
         return modelService.filterModels(name, pageable);
 	}	
 	
 	@GetMapping("/models/{id}")
-	public ResponseEntity<Model> getModel(@PathVariable Long id) {
+	public ResponseEntity<ModelDTO> getModel(@PathVariable Long id) {
 		
 		try {
-			Model model = modelService.findById(id);
-			return new ResponseEntity<>(model, HttpStatus.OK);
+			ModelDTO modelDto = service.findModelById(id);
+			return new ResponseEntity<>(modelDto, HttpStatus.OK);
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -60,11 +60,11 @@ public class ModelController {
 	}
 	
 	@PostMapping("/models")
-	public ResponseEntity<Model> createModel(@RequestBody Model model) {
+	public ResponseEntity<ModelDTO> createModel(@RequestBody ModelDTO modelDto) {
 
 		try {
-			Model newModel = service.createModel(model);
-			return new ResponseEntity<>(newModel, HttpStatus.CREATED);
+			service.createModel(modelDto);
+			return new ResponseEntity<>(modelDto, HttpStatus.CREATED);
 			
 		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -75,7 +75,7 @@ public class ModelController {
 	}
 	
 	@DeleteMapping("/models/{id}")
-	public ResponseEntity<Model> deleteModel(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteModel(@PathVariable Long id) {
 
 		try {
 			service.deleteModelAndAssociations(id);

@@ -1,14 +1,15 @@
 package com.foxminded.tasks.car_rest_service.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -33,29 +34,22 @@ public class CarService {
 	Logger logger = LoggerFactory.getLogger(CarService.class);
 
 	@Autowired
-	public CarService(CarRepository carRepository, CarMapper carMapper) {
+	public CarService(CarRepository carRepository, CarMapper mapper) {
 		this.carRepository = carRepository;
-		this.mapper = carMapper;
+		this.mapper = mapper;
 	}
 
-	public List<CarDTO> findAll() {
+	public List<Car> findAll() {
 		
-		List<Car> cars = carRepository.findAll();
-		List<CarDTO> carsDto = new ArrayList<>();
-		
-		for(Car c : cars) {
-			CarDTO carDto = mapper.carToDto(c);
-			carsDto.add(carDto);
-		}
-		return carsDto;
+		return carRepository.findAll();
 	}
 
-	public CarDTO findById(Long id) {
+	public Car findById(Long id) {
 
 		Optional<Car> optCar = carRepository.findById(id);
 
 		if (optCar.isPresent()) {
-			return mapper.carToDto(optCar.get());
+			return optCar.get();
 
 		} else {
 			logger.error("Car with id {} is not found.", id);
@@ -88,7 +82,7 @@ public class CarService {
 
 	}
 
-	public Page<Car> filterCars(String makeName, String modelName, String categoryName, Integer year,
+	public Page<CarDTO> filterCars(String makeName, String modelName, String categoryName, Integer year,
 			Pageable pageable) {
 
 		if (makeName == null || makeName.isEmpty()) {
@@ -105,8 +99,13 @@ public class CarService {
 														.and(CarSpecification.filterByModel(modelName))
 														.and(CarSpecification.filterByCategory(categoryName))
 														.and(CarSpecification.filterByYear(year));
-
-		return carRepository.findAll(specification, pageable);
+		Page<Car> carsPage = carRepository.findAll(specification, pageable);
+		
+		List<CarDTO> carsDto = carsPage.getContent().stream()
+				.map(mapper :: carToDto)
+				.collect(Collectors.toList());
+		
+		return new PageImpl<>(carsDto, pageable, carsPage.getTotalElements());
 	}
 	
 	public List<Car> findByMake(Make make) {

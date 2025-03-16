@@ -16,9 +16,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.ActiveProfiles;
-
+import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
 
 @SpringBootTest
@@ -26,6 +26,9 @@ class ModelServiceTest {
 	
 	@Mock
 	ModelRepository repository;
+	
+	@Mock
+	ModelMapper mapper;
 	
 	@InjectMocks
 	ModelService service;
@@ -131,14 +134,18 @@ class ModelServiceTest {
 		String name = "Name";
 		Pageable pageable = PageRequest.of(0, 10);
 		Model model = new Model(1L, "Name");
-		Page<Model> expected = new PageImpl<Model>(List.of(model));
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
+		Page<Model> page = new PageImpl<Model>(List.of(model));
+		Page<ModelDTO> expected = new PageImpl<ModelDTO>(List.of(modelDto));
 		
-		when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(expected);
+		when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+		when(mapper.modelToDto(any(Model.class))).thenReturn(modelDto);
 		
-		Page<Model> actual = service.filterModels(name, pageable);
+		Page<ModelDTO> actual = service.filterModels(name, pageable);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findAll(any(Specification.class), eq(pageable));
+		verify(mapper, times(1)).modelToDto(any(Model.class));
 	}
 
 }

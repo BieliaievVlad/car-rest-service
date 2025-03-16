@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.service.DataManagementService;
 import com.foxminded.tasks.car_rest_service.service.ModelService;
@@ -42,8 +43,8 @@ class ModelControllerTest {
 	@Test
 	void getFilteredModels_ValidRequest_ReturnsModels() throws Exception {
 		
-		Model model = new Model(1L, "Name");
-		Page<Model> page = new PageImpl<>(List.of(model), PageRequest.of(0, 10), 1);
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
+		Page<ModelDTO> page = new PageImpl<>(List.of(modelDto), PageRequest.of(0, 10), 1);
 		
 		when(modelService.filterModels(any(), any(Pageable.class))).thenReturn(page);
 		
@@ -59,15 +60,15 @@ class ModelControllerTest {
 	void getModel_ModelExists_ReturnsModel() throws Exception {
 		
 		Long id = 1L;
-		Model model = new Model(1L, "Name");
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		
-		when(modelService.findById(anyLong())).thenReturn(model);
+		when(service.findModelById(anyLong())).thenReturn(modelDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/models/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(modelService, times(1)).findById(anyLong());
+        verify(service, times(1)).findModelById(anyLong());
 	}
 	
 	@Test
@@ -75,12 +76,12 @@ class ModelControllerTest {
 		
 		Long id = 1L;
 		
-		when(modelService.findById(anyLong())).thenThrow(new EntityNotFoundException());
+		when(service.findModelById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/models/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
         
-        verify(modelService, times(1)).findById(anyLong());
+        verify(service, times(1)).findModelById(anyLong());
 	}
 
 	@Test
@@ -89,7 +90,7 @@ class ModelControllerTest {
 		Model model = new Model(1L, "Name");
 		String modelJson = objectMapper.writeValueAsString(model);
 		
-		when(service.createModel(any(Model.class))).thenReturn(model);
+		when(service.createModel(any(ModelDTO.class))).thenReturn(model);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models")
         		.contentType("application/json")
@@ -98,13 +99,13 @@ class ModelControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).createModel(any(Model.class));
+        verify(service, times(1)).createModel(any(ModelDTO.class));
 	}
 	
 	@Test
 	void createModel_InvalidModel_ReturnsBadRequest() throws Exception {
 	
-		when(service.createModel(any(Model.class))).thenThrow(new IllegalArgumentException());
+		when(service.createModel(any(ModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());

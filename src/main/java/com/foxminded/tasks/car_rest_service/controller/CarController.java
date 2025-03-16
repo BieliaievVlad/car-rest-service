@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.entity.Car;
+import com.foxminded.tasks.car_rest_service.dto.CarDTO;
 import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.DataManagementService;
 
@@ -36,7 +36,7 @@ public class CarController {
     }
 
     @GetMapping("/cars")
-    public Page<Car> getFilteredCars(
+    public Page<CarDTO> getFilteredCars(
             @RequestParam(required = false) String makeName,
             @RequestParam(required = false) String modelName,
             @RequestParam(required = false) String categoryName,
@@ -49,11 +49,11 @@ public class CarController {
     }
     
     @GetMapping("/cars/{id}")
-    public ResponseEntity<Car> getCar(@PathVariable Long id) {
+    public ResponseEntity<CarDTO> getCar(@PathVariable Long id) {
     	
     	try {
-    		Car car = carService.findById(id);
-    		return new ResponseEntity<>(car, HttpStatus.OK);
+    		CarDTO carDto = service.findCarById(id);
+    		return new ResponseEntity<>(carDto, HttpStatus.OK);
     		
     	} catch (EntityNotFoundException e){	
     		return new ResponseEntity<>(HttpStatus.NOT_FOUND); 
@@ -64,11 +64,11 @@ public class CarController {
     }
     
 	@PostMapping("/cars")
-	public ResponseEntity<Car> createCar(@RequestBody Car car) {
+	public ResponseEntity<CarDTO> createCar(@RequestBody CarDTO carDto) {
 
 		try {
-			Car newCar = service.createCar(car);
-			return new ResponseEntity<>(newCar, HttpStatus.CREATED);
+			service.createCar(carDto);
+			return new ResponseEntity<>(carDto, HttpStatus.CREATED);
 			
 		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import com.foxminded.tasks.car_rest_service.dto.CarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
@@ -44,23 +46,17 @@ class CarControllerTest {
 	
 	@Test
 	void getFilteredCars_ValidRequest_ReturnsCars() throws Exception {
-
-		Long id = 1L;
-		Make make = new Make(1L, "Make_Name");
-		Model model = new Model(1L, "Model_Name");
-		Category category = new Category(1L, "Category_Name");
-		Year year = Year.of(2025);
-		String objectId = "ObjectId";
-		Car car = new Car(id, make, model, category, year, objectId);
 		
-        Page<Car> carPage = new PageImpl<>(List.of(car), PageRequest.of(0, 10), 1);
+		CarDTO carDto = new CarDTO(1L, "Make_Name", "Model_Name", "Category_Name", 2025, "ObjectId");
+		
+        Page<CarDTO> carDtoPage = new PageImpl<>(List.of(carDto), PageRequest.of(0, 10), 1);
 
-        when(carService.filterCars(any(), any(), any(), any(), any(Pageable.class))).thenReturn(carPage);
+        when(carService.filterCars(any(), any(), any(), any(), any(Pageable.class))).thenReturn(carDtoPage);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/cars"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.length()").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].make.name").value("Make_Name"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].make").value("Make_Name"));
         
         verify(carService, times(1)).filterCars(any(), any(), any(), any(), any(Pageable.class));
 	}
@@ -69,25 +65,20 @@ class CarControllerTest {
 	void getCar_CarExists_ReturnsCar() throws Exception {
 
 		Long id = 1L;
-		Make make = new Make(1L, "Make_Name");
-		Model model = new Model(1L, "Model_Name");
-		Category category = new Category(1L, "Category_Name");
-		Year year = Year.of(2025);
-		String objectId = "ObjectId";
-		Car car = new Car(id, make, model, category, year, objectId);
+		CarDTO carDto = new CarDTO(1L, "Make_Name", "Model_Name", "Category_Name", 2025, "ObjectId");
 		
-		when(carService.findById(anyLong())).thenReturn(car);
+		when(service.findCarById(anyLong())).thenReturn(carDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/cars/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1L))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.make.name").value("Make_Name"))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.model.name").value("Model_Name"))
-        .andExpect(MockMvcResultMatchers.jsonPath("$.category.name").value("Category_Name"))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.make").value("Make_Name"))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.model").value("Model_Name"))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("Category_Name"))
         .andExpect(MockMvcResultMatchers.jsonPath("$.year").value(2025))
         .andExpect(MockMvcResultMatchers.jsonPath("$.objectId").value("ObjectId"));
         
-        verify(carService, times(1)).findById(anyLong());
+        verify(service, times(1)).findCarById(anyLong());
 	}
 	
 	@Test
@@ -95,12 +86,12 @@ class CarControllerTest {
 		
 		Long id = 1L;
 		
-		when(carService.findById(anyLong())).thenThrow(new EntityNotFoundException());
+		when(service.findCarById(anyLong())).thenThrow(new EntityNotFoundException());
 		
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/cars/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isNotFound());
 		
-		verify(carService, times(1)).findById(anyLong());
+		verify(service, times(1)).findCarById(anyLong());
 	}
 
 	@Test
@@ -113,28 +104,29 @@ class CarControllerTest {
 		Year year = Year.of(2025);
 		String objectId = "ObjectId";
 		Car car = new Car(id, make, model, category, year, objectId);
-		String carJson = objectMapper.writeValueAsString(car);
+		CarDTO carDto = new CarDTO(1L, "Make_Name", "Model_Name", "Category_Name", 2025, "ObjectId");
+		String carDtoJson = objectMapper.writeValueAsString(carDto);
 		
-		when(service.createCar(any(Car.class))).thenReturn(car);
+		when(service.createCar(any(CarDTO.class))).thenReturn(car);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/cars")
         		.contentType("application/json")
-        		.content(carJson))
+        		.content(carDtoJson))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.make.name").value("Make_Name"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.model.name").value("Model_Name"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.category.name").value("Category_Name"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.make").value("Make_Name"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.model").value("Model_Name"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("Category_Name"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.year").value(2025))
         		.andExpect(MockMvcResultMatchers.jsonPath("$.objectId").value("ObjectId"));
         
-        verify(service, times(1)).createCar(any(Car.class));
+        verify(service, times(1)).createCar(any(CarDTO.class));
 	}
 	
 	@Test
 	void createCar_InvalidCar_ReturnsBadRequest() throws Exception {
 		
-		when(service.createCar(any(Car.class))).thenThrow(new IllegalArgumentException());
+		when(service.createCar(any(CarDTO.class))).thenThrow(new IllegalArgumentException());
 		
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/cars"))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());

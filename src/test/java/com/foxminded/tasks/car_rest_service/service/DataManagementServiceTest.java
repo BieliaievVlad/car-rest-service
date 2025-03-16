@@ -14,10 +14,18 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.foxminded.tasks.car_rest_service.dto.CarDTO;
+import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.mapper.CarMapper;
+import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
+import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
+import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 
 @SpringBootTest
 class DataManagementServiceTest {
@@ -34,8 +42,163 @@ class DataManagementServiceTest {
 	@Mock
 	CategoryService categoryService;
 	
+	@Mock
+	CarMapper carMapper;
+	
+	@Mock
+	MakeMapper makeMapper;
+	
+	@Mock
+	ModelMapper modelMapper;
+	
+	@Mock
+	CategoryMapper categoryMapper;
+	
 	@InjectMocks
 	DataManagementService service;
+	
+	@Test
+	void findAllCars_ValidValue_CalledMethodsAndReturnsExpected() {
+		
+		Long id = 1L;
+		Make make = new Make(1L, "Name");
+		Model model = new Model(1L, "Name");
+		Category category = new Category(1L, "Name");
+		Year year = Year.of(2025);
+		String objectId = "ObjectId";
+		Car car = new Car(id, make, model, category, year, objectId);
+		CarDTO carDto = new CarDTO(1L, "Name", "Name", "Name", 2025, "ObjectId");
+		List<CarDTO> expected = List.of(carDto);
+		
+		when(carService.findAll()).thenReturn(List.of(car));
+		when(carMapper.carToDto(any(Car.class))).thenReturn(carDto);
+		
+		List<CarDTO> actual = service.findAllCars();
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(carService, times(1)).findAll();
+		verify(carMapper, times(1)).carToDto(any(Car.class));
+	}
+	
+	@Test
+	void findAllMakes_ValidValue_CalledMethodsAndReturnsExpected() {
+		
+		Make make = new Make(1L, "Name");
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
+		List<MakeDTO> expected = List.of(makeDto);
+		
+		when(makeService.findAll()).thenReturn(List.of(make));
+		when(makeMapper.makeToDto(any(Make.class))).thenReturn(makeDto);
+		
+		List<MakeDTO> actual = service.findAllMakes();
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(makeService, times(1)).findAll();
+		verify(makeMapper, times(1)).makeToDto(any(Make.class));	
+	}
+	
+	@Test
+	void findAllModels_ValidValue_CalledMethodsAndReturnsExpected() {
+		
+		Model model = new Model(1L, "Name");
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
+		List<ModelDTO> expected = List.of(modelDto);
+		
+		when(modelService.findAll()).thenReturn(List.of(model));
+		when(modelMapper.modelToDto(any(Model.class))).thenReturn(modelDto);
+		
+		List<ModelDTO> actual = service.findAllModels();
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(modelService, times(1)).findAll();
+		verify(modelMapper, times(1)).modelToDto(any(Model.class));
+	}
+	@Test
+	void findAllCategories_ValidValue_CalledMethodsAndReturnsExpected() {
+		
+		Category category = new Category(1L, "Name");
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
+		List<CategoryDTO> expected = List.of(categoryDto);
+		
+		when(categoryService.findAll()).thenReturn(List.of(category));
+		when(categoryMapper.categoryToDto(any(Category.class))).thenReturn(categoryDto);
+		
+		List<CategoryDTO> actual = service.findAllCategories();
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(categoryService, times(1)).findAll();
+		verify(categoryMapper, times(1)).categoryToDto(any(Category.class));
+	}
+	
+	@Test
+	void findCarById_ValidId_CalledMethodsAndReturnsExpected() {
+		
+		Long id = 1L;
+		Make make = new Make(1L, "Name");
+		Model model = new Model(1L, "Name");
+		Category category = new Category(1L, "Name");
+		Year year = Year.of(2025);
+		String objectId = "ObjectId";
+		Car car = new Car(id, make, model, category, year, objectId);
+		CarDTO expected = new CarDTO(1L, "Name", "Name", "Name", 2025, "ObjectId");
+		
+		when(carService.findById(anyLong())).thenReturn(car);
+		when(carMapper.carToDto(any(Car.class))).thenReturn(expected);
+		
+		CarDTO actual = service.findCarById(id);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(carService, times(1)).findById(anyLong());
+		verify(carMapper, times(1)).carToDto(any(Car.class));
+	}
+	@Test
+	void findMakeById_ValidId_CalledMethodsAndReturnsExpected() {
+		
+		Long id = 1L;
+		Make make = new Make(1L, "Name");
+		MakeDTO expected = new MakeDTO(1L, "Name");
+		
+		when(makeService.findById(anyLong())).thenReturn(make);
+		when(makeMapper.makeToDto(any(Make.class))).thenReturn(expected);
+		
+		MakeDTO actual = service.findMakeById(id);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(makeService, times(1)).findById(anyLong());
+		verify(makeMapper, times(1)).makeToDto(any(Make.class));
+	}
+	@Test
+	void findModelById_ValidId_CalledMethodsAndReturnsExpected() {
+		
+		Long id = 1L;
+		Model model = new Model(1L, "Name");
+		ModelDTO expected = new ModelDTO(1L, "Name");
+		
+		when(modelService.findById(anyLong())).thenReturn(model);
+		when(modelMapper.modelToDto(any(Model.class))).thenReturn(expected);
+		
+		ModelDTO actual = service.findModelById(id);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(modelService, times(1)).findById(anyLong());
+		verify(modelMapper, times(1)).modelToDto(any(Model.class));
+	}
+	@Test
+	void findCategoryById_ValidId_CalledMethodsAndReturnsExpected() {
+		
+		long id = 1L;
+		Category category = new Category(1L, "Name");
+		CategoryDTO expected = new CategoryDTO(1L, "Name");
+		
+		when(categoryService.findById(anyLong())).thenReturn(category);
+		when(categoryMapper.categoryToDto(any(Category.class))).thenReturn(expected);
+		
+		CategoryDTO actual = service.findCategoryById(id);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(categoryService, times(1)).findById(anyLong());
+		verify(categoryMapper, times(1)).categoryToDto(any(Category.class));
+	}
 	
 	@Test
 	void deleteCarById_ValidValue_CalledMethod() {
@@ -67,6 +230,7 @@ class DataManagementServiceTest {
 		String objectId = "";
 		String generatedObjectId = "ObjectId";
 		Car expected = new Car(make, model, category, year, objectId);
+		CarDTO carDto = new CarDTO(1L, "Name", "Name", "Name", 2025, "");
 		
 		when(makeService.findByNameOrSaveNew(anyString())).thenReturn(make);
 		when(modelService.findByNameOrSaveNew(anyString())).thenReturn(model);
@@ -74,7 +238,7 @@ class DataManagementServiceTest {
 		when(carService.generateObjectId()).thenReturn(generatedObjectId);
 		when(carService.save(any(Car.class))).thenReturn(expected);
 		
-		Car actual = service.createCar(expected);
+		Car actual = service.createCar(carDto);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(makeService, times(1)).findByNameOrSaveNew(anyString());
@@ -88,11 +252,12 @@ class DataManagementServiceTest {
 	void createMake_ValidValue_CalledMethodAndReturnsExpected() {
 		
 		Make expected = new Make(1L, "Name");
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
 		
 		when(makeService.existsByName(anyString())).thenReturn(false);
 		when(makeService.save(any(Make.class))).thenReturn(expected);
 		
-		Make actual = service.createMake(expected);
+		Make actual = service.createMake(makeDto);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(makeService, times(1)).existsByName(anyString());
@@ -103,11 +268,12 @@ class DataManagementServiceTest {
 	void createMake_InvalidValue_CalledMethodAndReturnsExpected() {
 		
 		Make expected = new Make(1L, "Name");
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
 		
 		when(makeService.existsByName(anyString())).thenReturn(true);
 		
 		assertThrows(IllegalArgumentException.class, () -> {
-			service.createMake(expected);
+			service.createMake(makeDto);
 		});
 		verify(makeService, times(1)).existsByName(anyString());
 	}
@@ -116,11 +282,12 @@ class DataManagementServiceTest {
 	void createModel_ValidValue_CalledMethodAndReturnsExpected() {
 		
 		Model expected = new Model(1L, "Name");
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		
 		when(modelService.existsByName(anyString())).thenReturn(false);
 		when(modelService.save(any(Model.class))).thenReturn(expected);
 		
-		Model actual = service.createModel(expected);
+		Model actual = service.createModel(modelDto);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(modelService, times(1)).existsByName(anyString());
@@ -131,11 +298,12 @@ class DataManagementServiceTest {
 	void createModel_InvalidValue_CalledMethodAndReturnsExpected() {
 		
 		Model expected = new Model(1L, "Name");
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		
 		when(modelService.existsByName(anyString())).thenReturn(true);
 		
 		assertThrows(IllegalArgumentException.class, () -> {
-			service.createModel(expected);
+			service.createModel(modelDto);
 		});
 		verify(modelService, times(1)).existsByName(anyString());
 	}
@@ -144,11 +312,12 @@ class DataManagementServiceTest {
 	void createCategory_ValidValue_CalledMethodAndReturnsExpected() {
 		
 		Category expected = new Category(1L, "Name");
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
 		
 		when(categoryService.existsByName(anyString())).thenReturn(false);
 		when(categoryService.save(any(Category.class))).thenReturn(expected);
 		
-		Category actual = service.createCategory(expected);
+		Category actual = service.createCategory(categoryDto);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(categoryService, times(1)).existsByName(anyString());
@@ -159,11 +328,12 @@ class DataManagementServiceTest {
 	void createCategory_InvalidValue_CalledMethodAndReturnsExpected() {
 		
 		Category expected = new Category(1L, "Name");
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
 		
 		when(categoryService.existsByName(anyString())).thenReturn(true);
 		
 		assertThrows(IllegalArgumentException.class, () -> {
-			service.createCategory(expected);
+			service.createCategory(categoryDto);
 		});
 		verify(categoryService, times(1)).existsByName(anyString());
 	}
@@ -226,6 +396,31 @@ class DataManagementServiceTest {
 		verify(carService, times(1)).findByCategory(any(Category.class));
 		verify(carService, times(1)).delete(any(Car.class));
 		verify(categoryService, times(1)).delete(any(Category.class));
+	}
+	
+	@Test
+	void dtoToCar_ValidValue_CalledMethodsAndReturnsExpected() {
+		
+		Make make = new Make(1L, "Name");
+		Model model = new Model(1L, "Name");
+		Category category = new Category(1L, "Name");
+		Year year = Year.of(2025);
+		String objectId = "ObjectId";
+		Car expected = new Car(make, model, category, year, objectId);
+		CarDTO carDto = new CarDTO(1L, "Name", "Name", "Name", 2025, "ObjectId");
+		
+		when(makeService.findByNameOrSaveNew(anyString())).thenReturn(make);
+		when(modelService.findByNameOrSaveNew(anyString())).thenReturn(model);
+		when(categoryService.findByNameOrSaveNew(anyString())).thenReturn(category);
+		when(carMapper.dtoToCar(any(CarDTO.class), any(Make.class), any(Model.class), any(Category.class))).thenReturn(expected);
+		
+		Car actual = service.dtoToCar(carDto);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(makeService, times(1)).findByNameOrSaveNew(anyString());
+		verify(modelService, times(1)).findByNameOrSaveNew(anyString());
+		verify(categoryService, times(1)).findByNameOrSaveNew(anyString());
+		verify(carMapper, times(1)).dtoToCar(any(CarDTO.class), any(Make.class), any(Model.class), any(Category.class));
 	}
 
 }

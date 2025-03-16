@@ -17,7 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.entity.Category;
+import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
 
 @SpringBootTest
@@ -25,6 +27,9 @@ class CategoryServiceTest {
 	
 	@Mock 
 	CategoryRepository repository;
+	
+	@Mock
+	CategoryMapper mapper;
 	
 	@InjectMocks
 	CategoryService service;
@@ -127,17 +132,21 @@ class CategoryServiceTest {
 	@Test
 	void filterCategories_ValidValue_CalledMethodAndReturnsExpected() {
 		
-		String name = "Category_Name";
+		String name = "Name";
 		Pageable pageable = PageRequest.of(0, 10);
 		Category category = new Category(1L, "Name");
-		Page<Category> expected = new PageImpl<Category>(List.of(category));
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
+		Page<Category> page = new PageImpl<Category>(List.of(category));
+		Page<CategoryDTO> expected = new PageImpl<CategoryDTO>(List.of(categoryDto));
 		
-		when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(expected);
+		when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+		when(mapper.categoryToDto(any(Category.class))).thenReturn(categoryDto);
 		
-		Page<Category> actual = service.filterCategories(name, pageable);
+		Page<CategoryDTO> actual = service.filterCategories(name, pageable);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findAll(any(Specification.class), eq(pageable));
+		verify(mapper, times(1)).categoryToDto(any(Category.class));
 	}
 
 }

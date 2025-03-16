@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.entity.Category;
+import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.service.CategoryService;
 import com.foxminded.tasks.car_rest_service.service.DataManagementService;
 
@@ -36,7 +36,7 @@ public class CategoryController {
 	}
 	
 	@GetMapping("/categories")
-	public Page<Category> getFilteredCategories(@RequestParam(required = false) String name,
+	public Page<CategoryDTO> getFilteredCategories(@RequestParam(required = false) String name,
 								 				@RequestParam(defaultValue = "0") int page,
 								 				@RequestParam(defaultValue = "10") int size) {
 		
@@ -45,11 +45,11 @@ public class CategoryController {
 	}
 	
 	@GetMapping("/categories/{id}")
-	public ResponseEntity<Category> getCategory(@PathVariable Long id) {
+	public ResponseEntity<CategoryDTO> getCategory(@PathVariable Long id) {
 		
 		try {
-			Category category = categoryService.findById(id);
-			return new ResponseEntity<>(category, HttpStatus.OK);
+			CategoryDTO categoryDto = service.findCategoryById(id);
+			return new ResponseEntity<>(categoryDto, HttpStatus.OK);
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -60,11 +60,11 @@ public class CategoryController {
 	}
 	
 	@PostMapping("/categories")
-	public ResponseEntity<Category> createCategory(@RequestBody Category category) {
+	public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO categoryDto) {
 
 		try {
-			Category newCategory = service.createCategory(category);
-			return new ResponseEntity<>(newCategory, HttpStatus.CREATED);
+			service.createCategory(categoryDto);
+			return new ResponseEntity<>(categoryDto, HttpStatus.CREATED);
 			
 		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -75,7 +75,7 @@ public class CategoryController {
 	}
 	
 	@DeleteMapping("/categories/{id}")
-	public ResponseEntity<Category> deleteCategory(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
 
 		try {
 			service.deleteCategoryAndAssociations(id);

@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.service.CategoryService;
 import com.foxminded.tasks.car_rest_service.service.DataManagementService;
@@ -42,8 +43,8 @@ class CategoryControllerTest {
 	@Test
 	void getFilteredCategories_ValidRequest_ReturnsCategories() throws Exception {
 		
-		Category category = new Category(1L, "Name");
-		Page<Category> page = new PageImpl<>(List.of(category), PageRequest.of(0, 10), 1);
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
+		Page<CategoryDTO> page = new PageImpl<>(List.of(categoryDto), PageRequest.of(0, 10), 1);
 		
 		when(categoryService.filterCategories(any(), any(Pageable.class))).thenReturn(page);
 		
@@ -59,15 +60,15 @@ class CategoryControllerTest {
 	void getCategory_CategoryExists_ReturnsCategory() throws Exception {
 		
 		Long id = 1L;
-		Category category = new Category(1L, "Name");
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
 		
-		when(categoryService.findById(anyLong())).thenReturn(category);
+		when(service.findCategoryById(anyLong())).thenReturn(categoryDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/categories/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(categoryService, times(1)).findById(anyLong());
+        verify(service, times(1)).findCategoryById(anyLong());
 	}
 	
 	@Test
@@ -75,12 +76,12 @@ class CategoryControllerTest {
 		
 		Long id = 1L;
 		
-		when(categoryService.findById(anyLong())).thenThrow(new EntityNotFoundException());
+		when(service.findCategoryById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/categories/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
         
-        verify(categoryService, times(1)).findById(anyLong());
+        verify(service, times(1)).findCategoryById(anyLong());
 	}
 
 	@Test
@@ -89,7 +90,7 @@ class CategoryControllerTest {
 		Category category = new Category(1L, "Name");
 		String categoryJson = objectMapper.writeValueAsString(category);
 		
-		when(service.createCategory(any(Category.class))).thenReturn(category);
+		when(service.createCategory(any(CategoryDTO.class))).thenReturn(category);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
         		.contentType("application/json")
@@ -98,13 +99,13 @@ class CategoryControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).createCategory(any(Category.class));
+        verify(service, times(1)).createCategory(any(CategoryDTO.class));
 	}
 	
 	@Test
 	void createCategory_InvalidCategory_ReturnsBadRequest() throws Exception {
 	
-		when(service.createCategory(any(Category.class))).thenThrow(new IllegalArgumentException());
+		when(service.createCategory(any(CategoryDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());

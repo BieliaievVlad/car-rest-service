@@ -17,7 +17,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
 import com.foxminded.tasks.car_rest_service.entity.Make;
+import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
 import com.foxminded.tasks.car_rest_service.repository.MakeRepository;
 
 @SpringBootTest
@@ -25,6 +27,9 @@ class MakeServiceTest {
 
 	@Mock
 	MakeRepository repository;
+	
+	@Mock
+	MakeMapper mapper;
 	
 	@InjectMocks
 	MakeService service;
@@ -130,14 +135,18 @@ class MakeServiceTest {
 		String name = "Name";
 		Pageable pageable = PageRequest.of(0, 10);
 		Make make = new Make(1L, "Name");
-		Page<Make> expected = new PageImpl<Make>(List.of(make));
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
+		Page<Make> page = new PageImpl<Make>(List.of(make));
+		Page<MakeDTO> expected = new PageImpl<MakeDTO>(List.of(makeDto));
 		
-		when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(expected);
+		when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+		when(mapper.makeToDto(any(Make.class))).thenReturn(makeDto);
 		
-		Page<Make> actual = service.filterMakes(name, pageable);
+		Page<MakeDTO> actual = service.filterMakes(name, pageable);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findAll(any(Specification.class), eq(pageable));
+		verify(mapper, times(1)).makeToDto(any(Make.class));
 	}
 
 }

@@ -34,18 +34,17 @@ public class CategoryService {
 		this.mapper = mapper;
 	}
 	
-	public List<CategoryDTO> findAll() {
-		return categoryRepository.findAll().stream()
-				.map(mapper :: categoryToDto)
-				.collect(Collectors.toList());
+	public List<Category> findAll() {
+		
+		return categoryRepository.findAll();
 	}
 	
-	public CategoryDTO findById(Long id) {
+	public Category findById(Long id) {
 
 		Optional<Category> optCategory = categoryRepository.findById(id);
 
 		if (optCategory.isPresent()) {
-			return mapper.categoryToDto(optCategory.get());
+			return optCategory.get();
 
 		} else {
 			logger.error("Category with id {} is not found.", id);
@@ -54,9 +53,7 @@ public class CategoryService {
 
 	}
 	
-	public Category save(CategoryDTO categoryDto) {
-		
-		Category category = mapper.dtoToCategory(categoryDto);
+	public Category save(Category category) {
 
 		if (!isCategoryValid(category)) {
 			logger.error("Save error. Category is not valid.");
@@ -68,9 +65,7 @@ public class CategoryService {
 
 	}
 	
-	public void delete(CategoryDTO categoryDto) {
-		
-		Category category = mapper.dtoToCategory(categoryDto);
+	public void delete(Category category) {
 
 		if (!isCategoryValid(category)) {
 			logger.error("Delete error. Category is not valid.");

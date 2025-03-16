@@ -34,19 +34,17 @@ public class ModelService {
 		this.mapper = mapper;
 	}
 	
-	public List<ModelDTO> findAll() {
+	public List<Model> findAll() {
 		
-		return modelRepository.findAll().stream()
-				.map(mapper :: modelToDto)
-				.collect(Collectors.toList());
+		return modelRepository.findAll();
 	}
 	
-	public ModelDTO findById(Long id) {
+	public Model findById(Long id) {
 
 		Optional<Model> optModel = modelRepository.findById(id);
 
 		if (optModel.isPresent()) {
-			return mapper.modelToDto(optModel.get());
+			return optModel.get();
 
 		} else {
 			logger.error("Model with id {} is not found.", id);
@@ -55,9 +53,7 @@ public class ModelService {
 
 	}
 	
-	public Model save(ModelDTO modelDto) {
-
-		Model model = mapper.dtoToModel(modelDto);
+	public Model save(Model model) {
 		
 		if (!isModelValid(model)) {
 			logger.error("Save error. Model is not valid.");
@@ -69,9 +65,7 @@ public class ModelService {
 
 	}
 	
-	public void delete(ModelDTO modelDto) {
-
-		Model model = mapper.dtoToModel(modelDto);
+	public void delete(Model model) {
 		
 		if (!isModelValid(model)) {
 			logger.error("Delete error. Model is not valid.");

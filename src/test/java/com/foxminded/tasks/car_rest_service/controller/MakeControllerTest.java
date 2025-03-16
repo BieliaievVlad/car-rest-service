@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.service.DataManagementService;
 import com.foxminded.tasks.car_rest_service.service.MakeService;
@@ -42,8 +43,8 @@ class MakeControllerTest {
 	@Test
 	void getFilteredMakes_ValidRequest_ReturnsMakes() throws Exception {
 		
-		Make make = new Make(1L, "Name");
-		Page<Make> page = new PageImpl<>(List.of(make), PageRequest.of(0, 10), 1);
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
+		Page<MakeDTO> page = new PageImpl<>(List.of(makeDto), PageRequest.of(0, 10), 1);
 		
 		when(makeService.filterMakes(any(), any(Pageable.class))).thenReturn(page);
 		
@@ -59,15 +60,15 @@ class MakeControllerTest {
 	void getMake_MakeExists_ReturnsMake() throws Exception {
 		
 		Long id = 1L;
-		Make make = new Make(1L, "Name");
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
 		
-		when(makeService.findById(anyLong())).thenReturn(make);
+		when(service.findMakeById(anyLong())).thenReturn(makeDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/makes/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(makeService, times(1)).findById(anyLong());
+        verify(service, times(1)).findMakeById(anyLong());
 	}
 	
 	@Test
@@ -75,12 +76,12 @@ class MakeControllerTest {
 		
 		Long id = 1L;
 		
-		when(makeService.findById(anyLong())).thenThrow(new EntityNotFoundException());
+		when(service.findMakeById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/makes/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
         
-        verify(makeService, times(1)).findById(anyLong());
+        verify(service, times(1)).findMakeById(anyLong());
 	}
 
 	@Test
@@ -89,7 +90,7 @@ class MakeControllerTest {
 		Make make = new Make(1L, "Name");
 		String makeJson = objectMapper.writeValueAsString(make);
 		
-		when(service.createMake(any(Make.class))).thenReturn(make);
+		when(service.createMake(any(MakeDTO.class))).thenReturn(make);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/makes")
         		.contentType("application/json")
@@ -98,13 +99,13 @@ class MakeControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).createMake(any(Make.class));
+        verify(service, times(1)).createMake(any(MakeDTO.class));
 	}
 	
 	@Test
 	void createMake_InvalidMake_ReturnsBadRequest() throws Exception {
 	
-		when(service.createMake(any(Make.class))).thenThrow(new IllegalArgumentException());
+		when(service.createMake(any(MakeDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/makes"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());

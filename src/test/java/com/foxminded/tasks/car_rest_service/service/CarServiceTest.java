@@ -19,13 +19,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.ActiveProfiles;
-
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
+import com.foxminded.tasks.car_rest_service.dto.CarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.mapper.CarMapper;
 import com.foxminded.tasks.car_rest_service.repository.CarRepository;
 
 @SpringBootTest
@@ -36,6 +36,9 @@ class CarServiceTest {
 
 	@Mock
 	CarRepository carRepository;
+	
+	@Mock
+	CarMapper mapper;
 
 	@Test
 	void findAll_ValidValue_CalledMethodAndReturnsExpected() {
@@ -124,7 +127,7 @@ class CarServiceTest {
 		Year year = Year.of(2025);
 		String objectId = "ObjectId";
 		Car car = new Car(id, make, model, category, year, objectId);
-
+		CarDTO carDto = new CarDTO(1L, "Make_Name", "Model_Name", "Category_Name", 2025, "ObjectId");
 		String makeName = "Make_Name";
 		String modelName = "Model_Name";
 		String categoryName = "Category_Name";
@@ -133,14 +136,17 @@ class CarServiceTest {
 		int size = 10;
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("id")));
 
-		Page<Car> expected = new PageImpl<>(List.of(car));
+		Page<Car> carPage = new PageImpl<>(List.of(car));
+		Page<CarDTO> expected = new PageImpl<>(List.of(carDto));
 
-		when(carRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expected);
+		when(carRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(carPage);
+		when(mapper.carToDto(any(Car.class))).thenReturn(carDto);
 
-		Page<Car> actual = carService.filterCars(makeName, modelName, categoryName, yearValue, pageable);
+		Page<CarDTO> actual = carService.filterCars(makeName, modelName, categoryName, yearValue, pageable);
 
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(carRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
+		verify(mapper, times(1)).carToDto(any(Car.class));
 
 	}
 
