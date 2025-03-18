@@ -1,6 +1,6 @@
 package com.foxminded.tasks.car_rest_service.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +22,7 @@ import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ModelServiceTest {
 	
 	@Mock

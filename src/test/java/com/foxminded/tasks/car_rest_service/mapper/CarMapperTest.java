@@ -4,16 +4,16 @@ import static org.assertj.core.api.Assertions.*;
 import java.time.Year;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.springframework.boot.test.context.SpringBootTest;
-
+import org.mockito.junit.jupiter.MockitoExtension;
 import com.foxminded.tasks.car_rest_service.dto.CarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class CarMapperTest {
 	
 	@InjectMocks

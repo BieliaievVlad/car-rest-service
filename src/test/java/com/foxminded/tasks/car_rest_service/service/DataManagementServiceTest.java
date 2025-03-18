@@ -1,6 +1,6 @@
 package com.foxminded.tasks.car_rest_service.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -9,11 +9,10 @@ import java.time.Year;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
+import org.mockito.junit.jupiter.MockitoExtension;
 import com.foxminded.tasks.car_rest_service.dto.CarDTO;
 import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
@@ -27,7 +26,7 @@ import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
 import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
 import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class DataManagementServiceTest {
 
 	@Mock
@@ -266,8 +265,7 @@ class DataManagementServiceTest {
 	
 	@Test
 	void createMake_InvalidValue_CalledMethodAndReturnsExpected() {
-		
-		Make expected = new Make(1L, "Name");
+
 		MakeDTO makeDto = new MakeDTO(1L, "Name");
 		
 		when(makeService.existsByName(anyString())).thenReturn(true);
@@ -296,8 +294,7 @@ class DataManagementServiceTest {
 	
 	@Test
 	void createModel_InvalidValue_CalledMethodAndReturnsExpected() {
-		
-		Model expected = new Model(1L, "Name");
+
 		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		
 		when(modelService.existsByName(anyString())).thenReturn(true);
@@ -326,8 +323,7 @@ class DataManagementServiceTest {
 	
 	@Test
 	void createCategory_InvalidValue_CalledMethodAndReturnsExpected() {
-		
-		Category expected = new Category(1L, "Name");
+
 		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
 		
 		when(categoryService.existsByName(anyString())).thenReturn(true);

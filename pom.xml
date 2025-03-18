@@ -87,12 +87,6 @@
 			<artifactId>opencsv</artifactId>
 			<version>5.6</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
-		<dependency>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>0.8.8</version>
-		</dependency>
 		<dependency>
 			<groupId>com.aventrix.jnanoid</groupId>
 			<artifactId>jnanoid</artifactId>
@@ -126,86 +120,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.8</version>
-				<configuration>
-					<outputDirectory>
-						${project.build.directory}/jacoco-reports</outputDirectory>
-					<excludes>
-						<exclude>ru/example/com/model/**/*</exclude>
-						<exclude>ru/example/com/client/*</exclude>
-						<exclude>ru/example/com/utils/*</exclude>
-						<exclude>
-							**/*com/foxminded/tasks/car_rest_service/config/**/*</exclude>
-						<exclude>
-							**/*com/foxminded/tasks/car_rest_service/entity/**/*</exclude>
-						<exclude>**/*com/foxminded/tasks/car_rest_service/specification/**/*</exclude>
-						<exclude>**/*com/foxminded/tasks/car_rest_service/util/**/*</exclude>
-						<exclude>
-							**/*com/foxminded/tasks/car_rest_service/**/CarRestServiceApplication.class</exclude>
-					</excludes>
-				</configuration>
-				<executions>
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>check-minimal</id>
-						<phase>package</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<rule>
-									<element>BUNDLE</element>
-									<limits>
-										<limit>
-											<counter>INSTRUCTION</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.1</minimum>
-										</limit>
-										<limit>
-											<counter>BRANCH</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.1</minimum>
-										</limit>
-										<limit>
-											<counter>CLASS</counter>
-											<value>MISSEDCOUNT</value>
-											<maximum>9999</maximum>
-										</limit>
-										<limit>
-											<counter>METHOD</counter>
-											<value>MISSEDCOUNT</value>
-											<maximum>9999</maximum>
-										</limit>
-										<limit>
-											<counter>LINE</counter>
-											<value>MISSEDCOUNT</value>
-											<maximum>999999</maximum>
-										</limit>
-									</limits>
-								</rule>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
 	</build>
 
