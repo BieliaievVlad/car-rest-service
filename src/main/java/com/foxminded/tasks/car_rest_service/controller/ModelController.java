@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,6 +66,21 @@ public class ModelController {
 		try {
 			service.createModel(modelDto);
 			return new ResponseEntity<>(modelDto, HttpStatus.CREATED);
+			
+		} catch (IllegalArgumentException e) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@PutMapping("/models/{id}")
+	public ResponseEntity<ModelDTO> updateModel(@PathVariable Long id, @RequestBody ModelDTO modelDto) {
+		
+		try {
+			service.updateModel(id, modelDto);
+			return new ResponseEntity<>(modelDto, HttpStatus.OK);
 			
 		} catch (IllegalArgumentException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
