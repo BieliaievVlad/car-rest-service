@@ -17,22 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
 import com.foxminded.tasks.car_rest_service.service.CategoryService;
-import com.foxminded.tasks.car_rest_service.service.DataManagementService;
-
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("api/v1")
 public class CategoryController {
 	
-	private final CategoryService categoryService;
-	private final DataManagementService service;
+	private final CategoryService service;
 	
 	@Autowired
-	public CategoryController(CategoryService categoryService, DataManagementService service) {
-		this.categoryService = categoryService;
+	public CategoryController(CategoryService service) {
 		this.service = service;
 	}
 	
@@ -42,7 +39,7 @@ public class CategoryController {
 								 				@RequestParam(defaultValue = "10") int size) {
 		
     	Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("id")));
-        return categoryService.filterCategories(name, pageable);
+        return service.filterCategories(name, pageable);
 	}
 	
 	@GetMapping("/categories/{id}")
@@ -61,10 +58,10 @@ public class CategoryController {
 	}
 	
 	@PostMapping("/categories")
-	public ResponseEntity<CategoryDTO> createCategory(@RequestBody CategoryDTO categoryDto) {
+	public ResponseEntity<CategoryDTO> createCategory(@RequestBody CreateUpdateCategoryDTO createCategoryDto) {
 
 		try {
-			service.createCategory(categoryDto);
+			CategoryDTO categoryDto = service.createCategory(createCategoryDto);
 			return new ResponseEntity<>(categoryDto, HttpStatus.CREATED);
 			
 		} catch (IllegalArgumentException e) {
@@ -76,10 +73,10 @@ public class CategoryController {
 	}
 	
 	@PutMapping("/categories/{id}")
-	public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody CategoryDTO categoryDto) {
+	public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody CreateUpdateCategoryDTO updateCategoryDto) {
 		
 		try {
-			service.updateCategory(id, categoryDto);
+			CategoryDTO categoryDto = service.updateCategory(id, updateCategoryDto);
 			return new ResponseEntity<>(categoryDto, HttpStatus.OK);
 			
 		} catch (IllegalArgumentException e) {

@@ -2,7 +2,7 @@ package com.foxminded.tasks.car_rest_service.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 
 @Component

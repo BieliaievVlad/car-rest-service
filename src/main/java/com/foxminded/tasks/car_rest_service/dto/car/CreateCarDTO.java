@@ -1,4 +1,4 @@
-package com.foxminded.tasks.car_rest_service.dto;
+package com.foxminded.tasks.car_rest_service.dto.car;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarDTO {
-	
-	private Long id;
+public class CreateCarDTO {
+
 	private String make;
 	private String model;
 	private String category;

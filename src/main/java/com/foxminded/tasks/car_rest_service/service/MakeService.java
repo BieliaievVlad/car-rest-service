@@ -13,7 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.CreateUpdateMakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
+import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
 import com.foxminded.tasks.car_rest_service.repository.MakeRepository;
@@ -25,12 +27,14 @@ import jakarta.persistence.EntityNotFoundException;
 public class MakeService {
 	
 	private final MakeRepository makeRepository;
+	private CarService carService;
 	private final MakeMapper mapper;
 	Logger logger = LoggerFactory.getLogger(MakeService.class);
 	
 	@Autowired
-	public MakeService(MakeRepository makeRepository, MakeMapper makeMapper) {
+	public MakeService(MakeRepository makeRepository, CarService carService, MakeMapper makeMapper) {
 		this.makeRepository = makeRepository;
+		this.carService = carService;
 		this.mapper = makeMapper;
 	}
 	
@@ -84,6 +88,47 @@ public class MakeService {
 		
 		return makeRepository.findByName(name)
 				.orElseGet(() -> makeRepository.save(new Make(name)));		
+	}
+	
+	public MakeDTO findMakeById(Long id) {
+		
+		Make make = findById(id);
+		
+		return mapper.makeToDto(make);
+	}
+	
+	public MakeDTO createMake(CreateUpdateMakeDTO createMakeDto) {
+		
+		if(!existsByName(createMakeDto.getName())) {
+
+			Make newMake = save(new Make(createMakeDto.getName()));
+			return mapper.makeToDto(newMake);
+			
+		} else {
+			logger.error("Make with name {} is already exists.", createMakeDto.getName());
+			throw new IllegalArgumentException();
+		}	
+	}
+	
+	public MakeDTO updateMake(Long id, CreateUpdateMakeDTO updateMakeDto) {
+		
+		Make makeToUpdate = findById(id);
+		makeToUpdate.setName(updateMakeDto.getName());
+		Make updatedMake = save(makeToUpdate);
+		
+		return mapper.makeToDto(updatedMake);
+	}
+	
+	public void deleteMakeAndAssociations(Long id) {
+		
+		Make make = findById(id);
+		List<Car> cars = carService.findByMake(make);
+		
+		for (Car c : cars) {
+			carService.delete(c);
+		}
+		
+		delete(make);
 	}
 	
 	public Page<MakeDTO> filterMakes(String name, Pageable pageable) {

@@ -4,7 +4,7 @@ import java.time.Year;
 
 import org.springframework.stereotype.Component;
 
-import com.foxminded.tasks.car_rest_service.dto.CarDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.CarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
@@ -13,7 +13,7 @@ import com.foxminded.tasks.car_rest_service.entity.Model;
 @Component
 public class CarMapper {
 
-	public CarDTO carToDto(Car car) {
+	public CarDTO carToCarDto(Car car) {
 		
 		return new CarDTO(
 				car.getId(),
@@ -24,7 +24,7 @@ public class CarMapper {
 				car.getObjectId());
 	}
 	
-	public Car dtoToCar(CarDTO carDto, Make make, Model model, Category category) {
+	public Car carDtoToCar(CarDTO carDto, Make make, Model model, Category category) {
 
 		return new Car(
 				carDto.getId(),

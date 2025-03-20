@@ -13,7 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
+import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
@@ -25,12 +27,14 @@ import jakarta.persistence.EntityNotFoundException;
 public class ModelService {
 	
 	private final ModelRepository modelRepository;
+	private CarService carService;
 	private final ModelMapper mapper;
 	Logger logger = LoggerFactory.getLogger(ModelService.class);
 	
 	@Autowired
-	public ModelService(ModelRepository modelRepository, ModelMapper mapper) {
+	public ModelService(ModelRepository modelRepository, CarService carService, ModelMapper mapper) {
 		this.modelRepository = modelRepository;
+		this.carService = carService;
 		this.mapper = mapper;
 	}
 	
@@ -86,6 +90,47 @@ public class ModelService {
 		
 		return modelRepository.findByName(name)
 				.orElseGet(() -> modelRepository.save(new Model(name)));
+	}
+	
+	public ModelDTO findModelById(Long id) {
+		
+		Model model = findById(id);
+		
+		return mapper.modelToDto(model);
+	}
+	
+	public ModelDTO createModel(CreateUpdateModelDTO createModelDto) {
+		
+		if(!existsByName(createModelDto.getName())) {
+			
+			Model newModel = save(new Model(createModelDto.getName()));
+			return mapper.modelToDto(newModel);
+			
+		} else {
+			logger.error("Model with name {} is already exists.", createModelDto.getName());
+			throw new IllegalArgumentException();
+		}	
+	}
+	
+	public ModelDTO updateModel(Long id, CreateUpdateModelDTO updateModelDto) {
+		
+		Model modelToUpdate = findById(id);
+		modelToUpdate.setName(updateModelDto.getName());
+		Model updatedModel = save(modelToUpdate);
+		
+		return mapper.modelToDto(updatedModel);
+	}
+	
+	public void deleteModelAndAssociations(Long id) {
+		
+		Model model = findById(id);
+		List<Car> cars = carService.findByModel(model);
+		
+		for (Car c : cars) {
+			carService.delete(c);
+		}
+		
+		delete(model);
 	}
 	
 	public Page<ModelDTO> filterModels (String name, Pageable pageable) {

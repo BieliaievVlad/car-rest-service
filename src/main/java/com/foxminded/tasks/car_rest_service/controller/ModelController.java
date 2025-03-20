@@ -17,22 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
 import com.foxminded.tasks.car_rest_service.service.ModelService;
-import com.foxminded.tasks.car_rest_service.service.DataManagementService;
-
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("api/v1")
 public class ModelController {
 	
-	private final ModelService modelService;
-	private final DataManagementService service;
+	private final ModelService service;
 	
 	@Autowired
-	public ModelController(ModelService modelService, DataManagementService service) {
-		this.modelService = modelService;
+	public ModelController(ModelService service) {
 		this.service = service;
 	}
 	
@@ -42,7 +39,7 @@ public class ModelController {
 										    @RequestParam(defaultValue = "10") int size) {
 		
     	Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("id")));
-        return modelService.filterModels(name, pageable);
+        return service.filterModels(name, pageable);
 	}	
 	
 	@GetMapping("/models/{id}")
@@ -61,10 +58,10 @@ public class ModelController {
 	}
 	
 	@PostMapping("/models")
-	public ResponseEntity<ModelDTO> createModel(@RequestBody ModelDTO modelDto) {
+	public ResponseEntity<ModelDTO> createModel(@RequestBody CreateUpdateModelDTO createModelDto) {
 
 		try {
-			service.createModel(modelDto);
+			ModelDTO modelDto = service.createModel(createModelDto);
 			return new ResponseEntity<>(modelDto, HttpStatus.CREATED);
 			
 		} catch (IllegalArgumentException e) {
@@ -76,10 +73,10 @@ public class ModelController {
 	}
 	
 	@PutMapping("/models/{id}")
-	public ResponseEntity<ModelDTO> updateModel(@PathVariable Long id, @RequestBody ModelDTO modelDto) {
+	public ResponseEntity<ModelDTO> updateModel(@PathVariable Long id, @RequestBody CreateUpdateModelDTO updateModelDto) {
 		
 		try {
-			service.updateModel(id, modelDto);
+			ModelDTO modelDto = service.updateModel(id, updateModelDto);
 			return new ResponseEntity<>(modelDto, HttpStatus.OK);
 			
 		} catch (IllegalArgumentException e) {

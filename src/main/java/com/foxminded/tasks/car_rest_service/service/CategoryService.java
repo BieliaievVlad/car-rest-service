@@ -13,7 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
+import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
@@ -25,12 +27,14 @@ import jakarta.persistence.EntityNotFoundException;
 public class CategoryService {
 	
 	private final CategoryRepository categoryRepository;
+	private CarService carService;
 	private final CategoryMapper mapper;
 	Logger logger = LoggerFactory.getLogger(CategoryService.class);
 	
 	@Autowired
-	public CategoryService(CategoryRepository categoryRepository, CategoryMapper mapper) {
+	public CategoryService(CategoryRepository categoryRepository, CarService carService, CategoryMapper mapper) {
 		this.categoryRepository = categoryRepository;
+		this.carService = carService;
 		this.mapper = mapper;
 	}
 	
@@ -86,6 +90,48 @@ public class CategoryService {
 		
 		return categoryRepository.findByName(name)
 				.orElseGet(() -> categoryRepository.save(new Category(name)));
+	}
+	
+	public CategoryDTO findCategoryById(Long id) {
+		
+		Category category = findById(id);
+		
+		return mapper.categoryToDto(category);
+	}
+	
+	public CategoryDTO createCategory(CreateUpdateCategoryDTO createCategoryDto) {
+		
+		if(!existsByName(createCategoryDto.getName())) {
+			
+			Category newCategory = save(new Category(createCategoryDto.getName()));
+			
+			return mapper.categoryToDto(newCategory);
+			
+		} else {
+			logger.error("Category with name {} is already exists.", createCategoryDto.getName());
+			throw new IllegalArgumentException();
+		}	
+	}
+	
+	public CategoryDTO updateCategory(Long id, CreateUpdateCategoryDTO updateCategoryDto) {
+		
+		Category categoryToUpdate = findById(id);
+		categoryToUpdate.setName(updateCategoryDto.getName());
+		Category updatedCategory = save(categoryToUpdate);
+		
+		return mapper.categoryToDto(updatedCategory);
+	}
+	
+	public void deleteCategoryAndAssociations(Long id) {
+		
+		Category category = findById(id);
+		List<Car> cars = carService.findByCategory(category);
+		
+		for (Car c : cars) {
+			carService.delete(c);
+		}
+		
+		delete(category);
 	}
 	
 	public Page<CategoryDTO> filterCategories(String name, Pageable pageable) {

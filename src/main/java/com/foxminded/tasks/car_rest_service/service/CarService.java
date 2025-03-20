@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
-import com.foxminded.tasks.car_rest_service.dto.CarDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.CarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
@@ -102,7 +102,7 @@ public class CarService {
 		Page<Car> carsPage = carRepository.findAll(specification, pageable);
 		
 		List<CarDTO> carsDto = carsPage.getContent().stream()
-				.map(mapper :: carToDto)
+				.map(mapper :: carToCarDto)
 				.collect(Collectors.toList());
 		
 		return new PageImpl<>(carsDto, pageable, carsPage.getTotalElements());

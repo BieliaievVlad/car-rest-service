@@ -17,22 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.CreateUpdateMakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
 import com.foxminded.tasks.car_rest_service.service.MakeService;
-import com.foxminded.tasks.car_rest_service.service.DataManagementService;
-
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("api/v1")
 public class MakeController {
 	
-	private final MakeService makeService;
-	private final DataManagementService service;
+	private final MakeService service;
 	
 	@Autowired
-	public MakeController(MakeService makeService,DataManagementService service) {
-		this.makeService = makeService;
+	public MakeController(MakeService service) {
 		this.service = service;
 	}
 	
@@ -42,7 +39,7 @@ public class MakeController {
 									   	  @RequestParam(defaultValue = "10") int size) {
 		
     	Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("id")));
-        return makeService.filterMakes(name, pageable);
+        return service.filterMakes(name, pageable);
 	}
 	
 	@GetMapping("/makes/{id}")
@@ -61,10 +58,10 @@ public class MakeController {
 	}
 	
 	@PostMapping("/makes")
-	public ResponseEntity<MakeDTO> createMake(@RequestBody MakeDTO makeDto) {
+	public ResponseEntity<MakeDTO> createMake(@RequestBody CreateUpdateMakeDTO createMakeDto) {
 
 		try {
-			service.createMake(makeDto);
+			MakeDTO makeDto = service.createMake(createMakeDto);
 			return new ResponseEntity<>(makeDto, HttpStatus.CREATED);
 			
 		} catch (IllegalArgumentException e) {
@@ -76,10 +73,10 @@ public class MakeController {
 	}
 	
 	@PutMapping("/makes/{id}")
-	public ResponseEntity<MakeDTO> updateMake(@PathVariable Long id, @RequestBody MakeDTO makeDto) {
+	public ResponseEntity<MakeDTO> updateMake(@PathVariable Long id, @RequestBody CreateUpdateMakeDTO updateMakeDto) {
 		
 		try {
-			service.updateMake(id, makeDto);
+			MakeDTO makeDto = service.updateMake(id, updateMakeDto);
 			return new ResponseEntity<>(makeDto, HttpStatus.OK);
 			
 		} catch (IllegalArgumentException e) {
