@@ -18,10 +18,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
-import com.foxminded.tasks.car_rest_service.entity.Category;
+import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
+import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.CategoryService;
-import com.foxminded.tasks.car_rest_service.service.DataManagementService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -35,10 +35,10 @@ class CategoryControllerTest {
 	private ObjectMapper objectMapper;
 	
 	@MockBean
-	CategoryService categoryService;
+	CategoryService service;
 	
 	@MockBean
-	DataManagementService service;
+	CarService carService;
 	
 	@Test
 	void getFilteredCategories_ValidRequest_ReturnsCategories() throws Exception {
@@ -46,14 +46,14 @@ class CategoryControllerTest {
 		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
 		Page<CategoryDTO> page = new PageImpl<>(List.of(categoryDto), PageRequest.of(0, 10), 1);
 		
-		when(categoryService.filterCategories(any(), any(Pageable.class))).thenReturn(page);
+		when(service.filterCategories(any(), any(Pageable.class))).thenReturn(page);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/categories"))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.content.length()").value(1))
         .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].name").value("Name"));
         
-        verify(categoryService, times(1)).filterCategories(any(), any(Pageable.class));	
+        verify(service, times(1)).filterCategories(any(), any(Pageable.class));	
 	}
 
 	@Test
@@ -87,10 +87,10 @@ class CategoryControllerTest {
 	@Test
 	void createCategory_ValidCategory_ReturnsCreated() throws Exception {
 
-		Category category = new Category(1L, "Name");
-		String categoryJson = objectMapper.writeValueAsString(category);
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
+		String categoryJson = objectMapper.writeValueAsString(categoryDto);
 		
-		when(service.createCategory(any(CategoryDTO.class))).thenReturn(category);
+		when(service.createCategory(any(CreateUpdateCategoryDTO.class))).thenReturn(categoryDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
         		.contentType("application/json")
@@ -99,16 +99,46 @@ class CategoryControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).createCategory(any(CategoryDTO.class));
+        verify(service, times(1)).createCategory(any(CreateUpdateCategoryDTO.class));
 	}
 	
 	@Test
 	void createCategory_InvalidCategory_ReturnsBadRequest() throws Exception {
 	
-		when(service.createCategory(any(CategoryDTO.class))).thenThrow(new IllegalArgumentException());
+		when(service.createCategory(any(CreateUpdateCategoryDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	void updateCategory_ValidCategory_ReturnsOk() throws Exception {
+		
+		Long id = 1L;
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
+		String categoryJson = objectMapper.writeValueAsString(categoryDto);
+		
+		when(service.updateCategory(anyLong(), any(CreateUpdateCategoryDTO.class))).thenReturn(categoryDto);
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id)
+        		.contentType("application/json")
+        		.content(categoryJson))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
+        
+        verify(service, times(1)).updateCategory(anyLong(), any(CreateUpdateCategoryDTO.class));
+	}
+	
+	@Test
+	void updateCategory_InvalidCategory_ReturnsBadRequest() throws Exception {
+		
+		Long id = 1L;
+		
+		when(service.updateCategory(anyLong(), any(CreateUpdateCategoryDTO.class))).thenThrow(new IllegalArgumentException());
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	@Test
@@ -116,12 +146,12 @@ class CategoryControllerTest {
 		
 		Long id = 1L;
 		
-		doNothing().when(service).deleteCategoryAndAssociations(anyLong());
+		doNothing().when(carService).deleteCategoryAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isNoContent());
 		
-		verify(service, times(1)).deleteCategoryAndAssociations(anyLong());
+		verify(carService, times(1)).deleteCategoryAndAssociations(anyLong());
 	}
 	
 	@Test
@@ -129,12 +159,12 @@ class CategoryControllerTest {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(service).deleteCategoryAndAssociations(anyLong());
+		doThrow(new IllegalArgumentException()).when(carService).deleteCategoryAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 		
-		verify(service, times(1)).deleteCategoryAndAssociations(anyLong());
+		verify(carService, times(1)).deleteCategoryAndAssociations(anyLong());
 	}
 
 }

@@ -18,9 +18,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
-import com.foxminded.tasks.car_rest_service.service.DataManagementService;
+import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.ModelService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -35,10 +36,10 @@ class ModelControllerTest {
 	private ObjectMapper objectMapper;
 	
 	@MockBean
-	ModelService modelService;
+	ModelService service;
 	
 	@MockBean
-	DataManagementService service;
+	CarService carService;
 	
 	@Test
 	void getFilteredModels_ValidRequest_ReturnsModels() throws Exception {
@@ -46,14 +47,14 @@ class ModelControllerTest {
 		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		Page<ModelDTO> page = new PageImpl<>(List.of(modelDto), PageRequest.of(0, 10), 1);
 		
-		when(modelService.filterModels(any(), any(Pageable.class))).thenReturn(page);
+		when(service.filterModels(any(), any(Pageable.class))).thenReturn(page);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/models"))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.content.length()").value(1))
         .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].name").value("Name"));
         
-        verify(modelService, times(1)).filterModels(any(), any(Pageable.class));	
+        verify(service, times(1)).filterModels(any(), any(Pageable.class));	
 	}
 
 	@Test
@@ -87,10 +88,10 @@ class ModelControllerTest {
 	@Test
 	void createModel_ValidModel_ReturnsCreated() throws Exception {
 
-		Model model = new Model(1L, "Name");
-		String modelJson = objectMapper.writeValueAsString(model);
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
+		String modelJson = objectMapper.writeValueAsString(modelDto);
 		
-		when(service.createModel(any(ModelDTO.class))).thenReturn(model);
+		when(service.createModel(any(CreateUpdateModelDTO.class))).thenReturn(modelDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models")
         		.contentType("application/json")
@@ -99,15 +100,45 @@ class ModelControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).createModel(any(ModelDTO.class));
+        verify(service, times(1)).createModel(any(CreateUpdateModelDTO.class));
 	}
 	
 	@Test
 	void createModel_InvalidModel_ReturnsBadRequest() throws Exception {
 	
-		when(service.createModel(any(ModelDTO.class))).thenThrow(new IllegalArgumentException());
+		when(service.createModel(any(CreateUpdateModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	void updateModel_ValidModel_ReturnsOk() throws Exception {
+		
+		Long id = 1L;
+		ModelDTO modelDto = new ModelDTO(1L, "Name");
+		String modelJson = objectMapper.writeValueAsString(modelDto);
+		
+		when(service.updateModel(anyLong(), any(CreateUpdateModelDTO.class))).thenReturn(modelDto);
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id)
+        		.contentType("application/json")
+        		.content(modelJson))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
+        
+        verify(service, times(1)).updateModel(anyLong(), any(CreateUpdateModelDTO.class));
+	}
+	
+	@Test
+	void updateModel_InvalidModel_ReturnsBadRequest() throws Exception {
+		
+		Long id = 1L;
+		
+		when(service.updateModel(anyLong(), any(CreateUpdateModelDTO.class))).thenThrow(new IllegalArgumentException());
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
@@ -116,12 +147,12 @@ class ModelControllerTest {
 		
 		Long id = 1L;
 		
-		doNothing().when(service).deleteModelAndAssociations(anyLong());
+		doNothing().when(carService).deleteModelAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/models/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isNoContent());
 		
-		verify(service, times(1)).deleteModelAndAssociations(anyLong());
+		verify(carService, times(1)).deleteModelAndAssociations(anyLong());
 	}
 	
 	@Test
@@ -129,12 +160,12 @@ class ModelControllerTest {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(service).deleteModelAndAssociations(anyLong());
+		doThrow(new IllegalArgumentException()).when(carService).deleteModelAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/models/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 		
-		verify(service, times(1)).deleteModelAndAssociations(anyLong());
+		verify(carService, times(1)).deleteModelAndAssociations(anyLong());
 	}
 
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.foxminded.tasks.car_rest_service.dto.make.CreateUpdateMakeDTO;
 import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
+import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.MakeService;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -27,10 +28,13 @@ import jakarta.persistence.EntityNotFoundException;
 public class MakeController {
 	
 	private final MakeService service;
+	private CarService carService;
 	
 	@Autowired
-	public MakeController(MakeService service) {
+	public MakeController(MakeService service,
+						  CarService carService) {
 		this.service = service;
+		this.carService = carService;
 	}
 	
 	@GetMapping("/makes")
@@ -91,7 +95,7 @@ public class MakeController {
 	public ResponseEntity<Void> deleteMake(@PathVariable Long id) {
 
 		try {
-			service.deleteMakeAndAssociations(id);
+			carService.deleteMakeAndAssociations(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (IllegalArgumentException e) {

@@ -1,6 +1,7 @@
 package com.foxminded.tasks.car_rest_service.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -16,7 +17,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import com.foxminded.tasks.car_rest_service.dto.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
@@ -126,6 +128,75 @@ class CategoryServiceTest {
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findByName(anyString());
 		verify(repository, times(1)).save(any(Category.class));
+	}
+	
+	@Test
+	void findCategoryById_ValidId_CalledMethodsAndReturnsExpected() {
+		
+		long id = 1L;
+		Category category = new Category(1L, "Name");
+		CategoryDTO expected = new CategoryDTO(1L, "Name");
+		
+		when(repository.findById(anyLong())).thenReturn(Optional.of(category));
+		when(mapper.categoryToDto(any(Category.class))).thenReturn(expected);
+		
+		CategoryDTO actual = service.findCategoryById(id);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(repository, times(1)).findById(anyLong());
+		verify(mapper, times(1)).categoryToDto(any(Category.class));
+	}
+	
+	@Test
+	void createCategory_ValidValue_CalledMethodAndReturnsExpected() {
+		
+		Category category = new Category(1L, "Name");
+		CreateUpdateCategoryDTO createDto = new CreateUpdateCategoryDTO("Name");
+		CategoryDTO expected = new CategoryDTO(1L, "Name");
+		
+		when(repository.existsByName(anyString())).thenReturn(false);
+		when(repository.save(any(Category.class))).thenReturn(category);
+		when(mapper.categoryToDto(any(Category.class))).thenReturn(expected);
+		
+		CategoryDTO actual = service.createCategory(createDto);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(repository, times(1)).existsByName(anyString());
+		verify(repository, times(1)).save(any(Category.class));
+		verify(mapper, times(1)).categoryToDto(any(Category.class));
+	}
+	
+	@Test
+	void createCategory_InvalidValue_CalledMethodAndReturnsExpected() {
+
+		CreateUpdateCategoryDTO categoryDto = new CreateUpdateCategoryDTO("Name");
+		
+		when(repository.existsByName(anyString())).thenReturn(true);
+		
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.createCategory(categoryDto);
+		});
+		verify(repository, times(1)).existsByName(anyString());
+	}
+	
+	@Test
+	void updateCategory_ValidCategory_CalledMethodsAndReturnsExpected() {
+		
+		Long id = 1L;
+		Category category = new Category(1L, "Name");
+		CreateUpdateCategoryDTO updateDto = new CreateUpdateCategoryDTO("Name");
+		CategoryDTO expected = new CategoryDTO(1L, "Category_Name");
+		
+		when(repository.findById(anyLong())).thenReturn(Optional.of(category));
+		when(repository.save(any(Category.class))).thenReturn(category);
+		when(mapper.categoryToDto(any(Category.class))).thenReturn(expected);
+		
+		CategoryDTO actual = service.updateCategory(id, updateDto);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(repository, times(1)).findById(anyLong());
+		verify(repository, times(1)).save(any(Category.class));
+		verify(mapper, times(1)).categoryToDto(any(Category.class));
 	}
 
 	@Test

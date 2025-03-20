@@ -5,6 +5,7 @@ import java.time.Year;
 import org.springframework.stereotype.Component;
 
 import com.foxminded.tasks.car_rest_service.dto.car.CarDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.CarListItemDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
@@ -22,6 +23,15 @@ public class CarMapper {
 				car.getCategory().getName(),
 				car.getYear().getValue(),
 				car.getObjectId());
+	}
+	
+	public CarListItemDTO carToCarListItemDto(Car car) {
+		
+		return new CarListItemDTO(
+				car.getMake().getName(),
+				car.getModel().getName(),
+				car.getCategory().getName(),
+				car.getYear().getValue());
 	}
 	
 	public Car carDtoToCar(CarDTO carDto, Make make, Model model, Category category) {

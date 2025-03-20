@@ -1,5 +1,6 @@
 package com.foxminded.tasks.car_rest_service.service;
 
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.foxminded.tasks.car_rest_service.dto.car.CarDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.CarListItemDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.CreateCarDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.UpdateCarDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
@@ -30,12 +34,22 @@ import jakarta.persistence.EntityNotFoundException;
 public class CarService {
 
 	private final CarRepository carRepository;
+	private MakeService makeService;
+	private ModelService modelService;
+	private CategoryService categoryService;
 	private final CarMapper mapper;
 	Logger logger = LoggerFactory.getLogger(CarService.class);
 
 	@Autowired
-	public CarService(CarRepository carRepository, CarMapper mapper) {
+	public CarService(CarRepository carRepository, 
+					  MakeService makeService,
+					  ModelService modelService,
+					  CategoryService categoryService,
+					  CarMapper mapper) {
 		this.carRepository = carRepository;
+		this.makeService = makeService;
+		this.modelService = modelService;
+		this.categoryService = categoryService;
 		this.mapper = mapper;
 	}
 
@@ -81,8 +95,61 @@ public class CarService {
 		}
 
 	}
+	
+	public CarDTO findCarById(Long id) {
+		
+		Car car = findById(id);
+		
+		return mapper.carToCarDto(car);
+	}
+	
+	public CarDTO createCar(CreateCarDTO createCarDto) {
 
-	public Page<CarDTO> filterCars(String makeName, String modelName, String categoryName, Integer year,
+		Make make = makeService.findByNameOrSaveNew(createCarDto.getMake());
+		Model model = modelService.findByNameOrSaveNew(createCarDto.getModel());
+		Category category = categoryService.findByNameOrSaveNew(createCarDto.getCategory());
+		Year year = Year.of(createCarDto.getYear());
+		String objectId = createCarDto.getObjectId();
+		
+		if(objectId == null || objectId.isEmpty()) {
+			objectId = generateObjectId();
+		}
+		
+		Car newCar = save(new Car(make, model, category, year, objectId));
+		
+		return mapper.carToCarDto(newCar);		
+	}
+	
+	public CarDTO updateCar(Long id, UpdateCarDTO updateCarDto) {
+		
+		Car carToUpdate = findById(id);
+		Make makeToUpdate = carToUpdate.getMake();
+		Model modelToUpdate = carToUpdate.getModel();
+		Category categoryToUpdate = carToUpdate.getCategory();
+		
+		makeToUpdate.setName(updateCarDto.getMake());
+		modelToUpdate.setName(updateCarDto.getModel());
+		categoryToUpdate.setName(updateCarDto.getCategory());
+		Year updatedYear = Year.of(updateCarDto.getYear());
+		
+		carToUpdate.setMake(makeToUpdate);
+		carToUpdate.setModel(modelToUpdate);
+		carToUpdate.setCategory(categoryToUpdate);
+		carToUpdate.setYear(updatedYear);
+		
+		Car updatedCar = save(carToUpdate);
+		
+		return mapper.carToCarDto(updatedCar);
+	}
+	
+	public void deleteCarById(Long id) {
+		
+		Car car = findById(id);
+
+		delete(car);
+	}
+
+	public Page<CarListItemDTO> filterCars(String makeName, String modelName, String categoryName, Integer year,
 			Pageable pageable) {
 
 		if (makeName == null || makeName.isEmpty()) {
@@ -101,11 +168,11 @@ public class CarService {
 														.and(CarSpecification.filterByYear(year));
 		Page<Car> carsPage = carRepository.findAll(specification, pageable);
 		
-		List<CarDTO> carsDto = carsPage.getContent().stream()
-				.map(mapper :: carToCarDto)
+		List<CarListItemDTO> carsListDto = carsPage.getContent().stream()
+				.map(mapper :: carToCarListItemDto)
 				.collect(Collectors.toList());
 		
-		return new PageImpl<>(carsDto, pageable, carsPage.getTotalElements());
+		return new PageImpl<>(carsListDto, pageable, carsPage.getTotalElements());
 	}
 	
 	public List<Car> findByMake(Make make) {
@@ -118,6 +185,42 @@ public class CarService {
 	
 	public List<Car> findByCategory(Category category) {
 		return carRepository.findByCategory(category);
+	}
+	
+	public void deleteMakeAndAssociations(Long id) {
+		
+		Make make = makeService.findById(id);
+		List<Car> cars = findByMake(make);
+		
+		for (Car c : cars) {
+			delete(c);
+		}
+		
+		makeService.delete(make);
+	}
+	
+	public void deleteModelAndAssociations(Long id) {
+		
+		Model model = modelService.findById(id);
+		List<Car> cars = findByModel(model);
+		
+		for (Car c : cars) {
+			delete(c);
+		}
+		
+		modelService.delete(model);
+	}
+	
+	public void deleteCategoryAndAssociations(Long id) {
+		
+		Category category = categoryService.findById(id);
+		List<Car> cars = findByCategory(category);
+		
+		for (Car c : cars) {
+			delete(c);
+		}
+		
+		categoryService.delete(category);
 	}
 	
 	public String generateObjectId() {

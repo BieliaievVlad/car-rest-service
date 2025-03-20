@@ -18,9 +18,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.foxminded.tasks.car_rest_service.dto.MakeDTO;
-import com.foxminded.tasks.car_rest_service.entity.Make;
-import com.foxminded.tasks.car_rest_service.service.DataManagementService;
+import com.foxminded.tasks.car_rest_service.dto.make.CreateUpdateMakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
+import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.MakeService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -35,10 +35,10 @@ class MakeControllerTest {
 	private ObjectMapper objectMapper;
 	
 	@MockBean
-	MakeService makeService;
+	MakeService service;
 	
 	@MockBean
-	DataManagementService service;
+	CarService carService;
 	
 	@Test
 	void getFilteredMakes_ValidRequest_ReturnsMakes() throws Exception {
@@ -46,14 +46,14 @@ class MakeControllerTest {
 		MakeDTO makeDto = new MakeDTO(1L, "Name");
 		Page<MakeDTO> page = new PageImpl<>(List.of(makeDto), PageRequest.of(0, 10), 1);
 		
-		when(makeService.filterMakes(any(), any(Pageable.class))).thenReturn(page);
+		when(service.filterMakes(any(), any(Pageable.class))).thenReturn(page);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/makes"))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.content.length()").value(1))
         .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].name").value("Name"));
         
-        verify(makeService, times(1)).filterMakes(any(), any(Pageable.class));	
+        verify(service, times(1)).filterMakes(any(), any(Pageable.class));	
 	}
 
 	@Test
@@ -87,10 +87,10 @@ class MakeControllerTest {
 	@Test
 	void createMake_ValidMake_ReturnsCreated() throws Exception {
 
-		Make make = new Make(1L, "Name");
-		String makeJson = objectMapper.writeValueAsString(make);
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
+		String makeJson = objectMapper.writeValueAsString(makeDto);
 		
-		when(service.createMake(any(MakeDTO.class))).thenReturn(make);
+		when(service.createMake(any(CreateUpdateMakeDTO.class))).thenReturn(makeDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/makes")
         		.contentType("application/json")
@@ -99,15 +99,45 @@ class MakeControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).createMake(any(MakeDTO.class));
+        verify(service, times(1)).createMake(any(CreateUpdateMakeDTO.class));
 	}
 	
 	@Test
 	void createMake_InvalidMake_ReturnsBadRequest() throws Exception {
 	
-		when(service.createMake(any(MakeDTO.class))).thenThrow(new IllegalArgumentException());
+		when(service.createMake(any(CreateUpdateMakeDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/makes"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	void updateMake_ValidMake_ReturnsOk() throws Exception {
+		
+		Long id = 1L;
+		MakeDTO makeDto = new MakeDTO(1L, "Name");
+		String makeJson = objectMapper.writeValueAsString(makeDto);
+		
+		when(service.updateMake(anyLong(), any(CreateUpdateMakeDTO.class))).thenReturn(makeDto);
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/makes/{id}", id)
+        		.contentType("application/json")
+        		.content(makeJson))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
+        
+        verify(service, times(1)).updateMake(anyLong(), any(CreateUpdateMakeDTO.class));
+	}
+	
+	@Test
+	void updateMake_InvalidMake_ReturnsBadRequest() throws Exception {
+		
+		Long id = 1L;
+		
+		when(service.updateMake(anyLong(), any(CreateUpdateMakeDTO.class))).thenThrow(new IllegalArgumentException());
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/makes/{id}", id))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
@@ -116,12 +146,12 @@ class MakeControllerTest {
 		
 		Long id = 1L;
 		
-		doNothing().when(service).deleteMakeAndAssociations(anyLong());
+		doNothing().when(carService).deleteMakeAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/makes/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isNoContent());
 		
-		verify(service, times(1)).deleteMakeAndAssociations(anyLong());
+		verify(carService, times(1)).deleteMakeAndAssociations(anyLong());
 	}
 	
 	@Test
@@ -129,12 +159,12 @@ class MakeControllerTest {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(service).deleteMakeAndAssociations(anyLong());
+		doThrow(new IllegalArgumentException()).when(carService).deleteMakeAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/makes/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 		
-		verify(service, times(1)).deleteMakeAndAssociations(anyLong());
+		verify(carService, times(1)).deleteMakeAndAssociations(anyLong());
 	}
 
 }

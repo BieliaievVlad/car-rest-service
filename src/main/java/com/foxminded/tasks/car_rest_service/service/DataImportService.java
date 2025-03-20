@@ -1,6 +1,8 @@
 package com.foxminded.tasks.car_rest_service.service;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.Year;
 
 import org.slf4j.Logger;
@@ -16,8 +18,6 @@ import com.foxminded.tasks.car_rest_service.repository.CarRepository;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
 import com.foxminded.tasks.car_rest_service.repository.MakeRepository;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
-import com.opencsv.CSVReader;
-
 import jakarta.annotation.PostConstruct;
 
 @Service
@@ -27,7 +27,7 @@ public class DataImportService {
 	private MakeRepository makeRepository;
 	private ModelRepository modelRepository;
 	private CategoryRepository categoryRepository;
-	private final String filePath = getClass().getClassLoader().getResource("file.csv").getFile();
+	private final String filePath = "file.csv";
 	Logger logger = LoggerFactory.getLogger(DataImportService.class);
 	
 	@Autowired
@@ -66,13 +66,20 @@ public class DataImportService {
 
 	private void importDataFromCsv(String filePath) throws Exception {
 
-		try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
-			String[] nextLine;
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
 
-			reader.readNext();
+		if (inputStream == null) {
+			throw new Exception("CSV file not found in resources.");
+		}
+		
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+			String line;
 
-			while ((nextLine = reader.readNext()) != null &&  
-					!nextLine[0].equals("")) {
+			reader.readLine();
+
+			while ((line = reader.readLine()) != null && !line.equals(",,,,")) {
+				
+				String[] nextLine = line.split(",");
 
 				String objectId = nextLine[0];
 				String makeName = nextLine[1];
@@ -82,17 +89,20 @@ public class DataImportService {
 
 				Make make = makeRepository.findByName(makeName)
 						.orElseGet(() -> makeRepository.save(new Make(makeName)));
-				
+
 				Model model = modelRepository.findByName(modelName)
 						.orElseGet(() -> modelRepository.save(new Model(modelName)));
-				
+
 				Category category = categoryRepository.findByName(categoryName)
 						.orElseGet(() -> categoryRepository.save(new Category(categoryName)));
-				
+
 				Car car = new Car(make, model, category, year, objectId);
 
 				carRepository.save(car);
 			}
+		} catch (Exception e) {
+			logger.error("Error processing CSV file", e);
+			throw e;
 		}
 	}
 }

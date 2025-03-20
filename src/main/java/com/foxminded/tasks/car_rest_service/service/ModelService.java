@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
 import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
-import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
@@ -27,14 +26,12 @@ import jakarta.persistence.EntityNotFoundException;
 public class ModelService {
 	
 	private final ModelRepository modelRepository;
-	private CarService carService;
 	private final ModelMapper mapper;
 	Logger logger = LoggerFactory.getLogger(ModelService.class);
 	
 	@Autowired
-	public ModelService(ModelRepository modelRepository, CarService carService, ModelMapper mapper) {
+	public ModelService(ModelRepository modelRepository, ModelMapper mapper) {
 		this.modelRepository = modelRepository;
-		this.carService = carService;
 		this.mapper = mapper;
 	}
 	
@@ -120,19 +117,7 @@ public class ModelService {
 		
 		return mapper.modelToDto(updatedModel);
 	}
-	
-	public void deleteModelAndAssociations(Long id) {
 		
-		Model model = findById(id);
-		List<Car> cars = carService.findByModel(model);
-		
-		for (Car c : cars) {
-			carService.delete(c);
-		}
-		
-		delete(model);
-	}
-	
 	public Page<ModelDTO> filterModels (String name, Pageable pageable) {
 		
 		if (name == null || name.isEmpty()) {

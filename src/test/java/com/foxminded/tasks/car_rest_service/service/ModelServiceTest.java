@@ -1,6 +1,7 @@
 package com.foxminded.tasks.car_rest_service.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -17,7 +18,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import com.foxminded.tasks.car_rest_service.dto.ModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
@@ -127,6 +129,75 @@ class ModelServiceTest {
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findByName(anyString());
 		verify(repository, times(1)).save(any(Model.class));
+	}
+	
+	@Test
+	void findModelById_ValidId_CalledMethodsAndReturnsExpected() {
+		
+		long id = 1L;
+		Model model = new Model(1L, "Name");
+		ModelDTO expected = new ModelDTO(1L, "Name");
+		
+		when(repository.findById(anyLong())).thenReturn(Optional.of(model));
+		when(mapper.modelToDto(any(Model.class))).thenReturn(expected);
+		
+		ModelDTO actual = service.findModelById(id);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(repository, times(1)).findById(anyLong());
+		verify(mapper, times(1)).modelToDto(any(Model.class));
+	}
+	
+	@Test
+	void createModel_ValidValue_CalledMethodAndReturnsExpected() {
+		
+		Model model = new Model(1L, "Name");
+		CreateUpdateModelDTO createDto = new CreateUpdateModelDTO("Name");
+		ModelDTO expected = new ModelDTO(1L, "Name");
+		
+		when(repository.existsByName(anyString())).thenReturn(false);
+		when(repository.save(any(Model.class))).thenReturn(model);
+		when(mapper.modelToDto(any(Model.class))).thenReturn(expected);
+		
+		ModelDTO actual = service.createModel(createDto);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(repository, times(1)).existsByName(anyString());
+		verify(repository, times(1)).save(any(Model.class));
+		verify(mapper, times(1)).modelToDto(any(Model.class));
+	}
+	
+	@Test
+	void createModel_InvalidValue_CalledMethodAndReturnsExpected() {
+
+		CreateUpdateModelDTO modelDto = new CreateUpdateModelDTO("Name");
+		
+		when(repository.existsByName(anyString())).thenReturn(true);
+		
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.createModel(modelDto);
+		});
+		verify(repository, times(1)).existsByName(anyString());
+	}
+	
+	@Test
+	void updateModel_ValidMake_CalledMethodsAndReturnsExpected() {
+		
+		Long id = 1L;
+		Model model = new Model(1L, "Name");
+		CreateUpdateModelDTO updateDto = new CreateUpdateModelDTO("Name");
+		ModelDTO expected = new ModelDTO(1L, "Make_Name");
+		
+		when(repository.findById(anyLong())).thenReturn(Optional.of(model));
+		when(repository.save(any(Model.class))).thenReturn(model);
+		when(mapper.modelToDto(any(Model.class))).thenReturn(expected);
+		
+		ModelDTO actual = service.updateModel(id, updateDto);
+		
+		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+		verify(repository, times(1)).findById(anyLong());
+		verify(repository, times(1)).save(any(Model.class));
+		verify(mapper, times(1)).modelToDto(any(Model.class));
 	}
 
 	@Test

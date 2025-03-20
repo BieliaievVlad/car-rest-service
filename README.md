@@ -96,8 +96,7 @@ By default, the application is available at the following address:
     	"make": "LADA",
     	"model": "KALINA",
     	"category": "Sedan",
-    	"year": "2026",
-    	"objectId": ""
+    	"year": "2026"
 	}
 
 ### 5. Delete a Car

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
+import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.CategoryService;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -27,10 +28,13 @@ import jakarta.persistence.EntityNotFoundException;
 public class CategoryController {
 	
 	private final CategoryService service;
+	private CarService carService;
 	
 	@Autowired
-	public CategoryController(CategoryService service) {
+	public CategoryController(CategoryService service,
+							  CarService carService) {
 		this.service = service;
+		this.carService = carService;
 	}
 	
 	@GetMapping("/categories")
@@ -91,7 +95,7 @@ public class CategoryController {
 	public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
 
 		try {
-			service.deleteCategoryAndAssociations(id);
+			carService.deleteCategoryAndAssociations(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (IllegalArgumentException e) {

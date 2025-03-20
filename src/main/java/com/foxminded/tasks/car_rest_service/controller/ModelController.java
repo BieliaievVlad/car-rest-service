@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
 import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
+import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.ModelService;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -27,10 +28,13 @@ import jakarta.persistence.EntityNotFoundException;
 public class ModelController {
 	
 	private final ModelService service;
+	private CarService carService;
 	
 	@Autowired
-	public ModelController(ModelService service) {
+	public ModelController(ModelService service,
+						   CarService carService) {
 		this.service = service;
+		this.carService = carService;
 	}
 	
 	@GetMapping("/models")
@@ -91,7 +95,7 @@ public class ModelController {
 	public ResponseEntity<Void> deleteModel(@PathVariable Long id) {
 
 		try {
-			service.deleteModelAndAssociations(id);
+			carService.deleteModelAndAssociations(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (IllegalArgumentException e) {

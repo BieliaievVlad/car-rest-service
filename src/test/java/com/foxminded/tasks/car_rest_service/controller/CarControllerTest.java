@@ -3,7 +3,6 @@ package com.foxminded.tasks.car_rest_service.controller;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.time.Year;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,13 +18,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import com.foxminded.tasks.car_rest_service.dto.CarDTO;
-import com.foxminded.tasks.car_rest_service.entity.Car;
-import com.foxminded.tasks.car_rest_service.entity.Category;
-import com.foxminded.tasks.car_rest_service.entity.Make;
-import com.foxminded.tasks.car_rest_service.entity.Model;
+import com.foxminded.tasks.car_rest_service.dto.car.CarDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.CarListItemDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.CreateCarDTO;
+import com.foxminded.tasks.car_rest_service.dto.car.UpdateCarDTO;
 import com.foxminded.tasks.car_rest_service.service.CarService;
-import com.foxminded.tasks.car_rest_service.service.DataManagementService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -39,26 +36,23 @@ class CarControllerTest {
 	private ObjectMapper objectMapper;
 	
 	@MockBean
-	CarService carService;
-	
-	@MockBean
-	DataManagementService service;
+	CarService service;
 	
 	@Test
 	void getFilteredCars_ValidRequest_ReturnsCars() throws Exception {
 		
-		CarDTO carDto = new CarDTO(1L, "Make_Name", "Model_Name", "Category_Name", 2025, "ObjectId");
+		CarListItemDTO carDto = new CarListItemDTO("Make_Name", "Model_Name", "Category_Name", 2025);
 		
-        Page<CarDTO> carDtoPage = new PageImpl<>(List.of(carDto), PageRequest.of(0, 10), 1);
+        Page<CarListItemDTO> carDtoPage = new PageImpl<>(List.of(carDto), PageRequest.of(0, 10), 1);
 
-        when(carService.filterCars(any(), any(), any(), any(), any(Pageable.class))).thenReturn(carDtoPage);
+        when(service.filterCars(any(), any(), any(), any(), any(Pageable.class))).thenReturn(carDtoPage);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/cars"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.length()").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].make").value("Make_Name"));
         
-        verify(carService, times(1)).filterCars(any(), any(), any(), any(), any(Pageable.class));
+        verify(service, times(1)).filterCars(any(), any(), any(), any(), any(Pageable.class));
 	}
 
 	@Test
@@ -96,18 +90,11 @@ class CarControllerTest {
 
 	@Test
 	void createCar_ValidCar_ReturnsCreated() throws Exception {
-		
-		Long id = 1L;
-		Make make = new Make(1L, "Make_Name");
-		Model model = new Model(1L, "Model_Name");
-		Category category = new Category(1L, "Category_Name");
-		Year year = Year.of(2025);
-		String objectId = "ObjectId";
-		Car car = new Car(id, make, model, category, year, objectId);
+
 		CarDTO carDto = new CarDTO(1L, "Make_Name", "Model_Name", "Category_Name", 2025, "ObjectId");
 		String carDtoJson = objectMapper.writeValueAsString(carDto);
 		
-		when(service.createCar(any(CarDTO.class))).thenReturn(car);
+		when(service.createCar(any(CreateCarDTO.class))).thenReturn(carDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/cars")
         		.contentType("application/json")
@@ -120,15 +107,49 @@ class CarControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.year").value(2025))
         		.andExpect(MockMvcResultMatchers.jsonPath("$.objectId").value("ObjectId"));
         
-        verify(service, times(1)).createCar(any(CarDTO.class));
+        verify(service, times(1)).createCar(any(CreateCarDTO.class));
 	}
 	
 	@Test
 	void createCar_InvalidCar_ReturnsBadRequest() throws Exception {
 		
-		when(service.createCar(any(CarDTO.class))).thenThrow(new IllegalArgumentException());
+		when(service.createCar(any(CreateCarDTO.class))).thenThrow(new IllegalArgumentException());
 		
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/cars"))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	void updateCar_ValidCar_ReturnsOk() throws Exception {
+		
+		Long id = 1L;
+		CarDTO carDto = new CarDTO(1L, "Make_Name", "Model_Name", "Category_Name", 2025, "ObjectId");
+		String carDtoJson = objectMapper.writeValueAsString(carDto);
+		
+		when(service.updateCar(anyLong(), any(UpdateCarDTO.class))).thenReturn(carDto);
+		
+	       mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/cars/{id}", id)
+	        		.contentType("application/json")
+	        		.content(carDtoJson))
+	                .andExpect(MockMvcResultMatchers.status().isOk())
+	                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
+	                .andExpect(MockMvcResultMatchers.jsonPath("$.make").value("Make_Name"))
+	                .andExpect(MockMvcResultMatchers.jsonPath("$.model").value("Model_Name"))
+	                .andExpect(MockMvcResultMatchers.jsonPath("$.category").value("Category_Name"))
+	                .andExpect(MockMvcResultMatchers.jsonPath("$.year").value(2025))
+	        		.andExpect(MockMvcResultMatchers.jsonPath("$.objectId").value("ObjectId"));
+	        
+	        verify(service, times(1)).updateCar(anyLong(), any(UpdateCarDTO.class));
+	}
+	
+	@Test
+	void updateCar_InvalidCar_ReturnsBadRequest() throws Exception {
+		
+		Long id = 1L;
+		
+		when(service.updateCar(anyLong(), any(UpdateCarDTO.class))).thenThrow(new IllegalArgumentException());
+		
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/cars/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
