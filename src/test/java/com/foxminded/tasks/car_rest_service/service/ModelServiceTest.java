@@ -19,7 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
-import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.UpsertModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.ModelRepository;
@@ -152,7 +152,7 @@ class ModelServiceTest {
 	void createModel_ValidValue_CalledMethodAndReturnsExpected() {
 		
 		Model model = new Model(1L, "Name");
-		CreateUpdateModelDTO createDto = new CreateUpdateModelDTO("Name");
+		UpsertModelDTO createDto = new UpsertModelDTO("Name");
 		ModelDTO expected = new ModelDTO(1L, "Name");
 		
 		when(repository.existsByName(anyString())).thenReturn(false);
@@ -170,7 +170,7 @@ class ModelServiceTest {
 	@Test
 	void createModel_InvalidValue_CalledMethodAndReturnsExpected() {
 
-		CreateUpdateModelDTO modelDto = new CreateUpdateModelDTO("Name");
+		UpsertModelDTO modelDto = new UpsertModelDTO("Name");
 		
 		when(repository.existsByName(anyString())).thenReturn(true);
 		
@@ -185,7 +185,7 @@ class ModelServiceTest {
 		
 		Long id = 1L;
 		Model model = new Model(1L, "Name");
-		CreateUpdateModelDTO updateDto = new CreateUpdateModelDTO("Name");
+		UpsertModelDTO updateDto = new UpsertModelDTO("Name");
 		ModelDTO expected = new ModelDTO(1L, "Make_Name");
 		
 		when(repository.findById(anyLong())).thenReturn(Optional.of(model));

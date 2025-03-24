@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
-import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.UpsertCategoryDTO;
 import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.CategoryService;
 import jakarta.persistence.EntityNotFoundException;
@@ -62,7 +62,7 @@ public class CategoryController {
 	}
 	
 	@PostMapping("/categories")
-	public ResponseEntity<CategoryDTO> createCategory(@RequestBody CreateUpdateCategoryDTO createCategoryDto) {
+	public ResponseEntity<CategoryDTO> createCategory(@RequestBody UpsertCategoryDTO createCategoryDto) {
 
 		try {
 			CategoryDTO categoryDto = service.createCategory(createCategoryDto);
@@ -77,7 +77,7 @@ public class CategoryController {
 	}
 	
 	@PutMapping("/categories/{id}")
-	public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody CreateUpdateCategoryDTO updateCategoryDto) {
+	public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody UpsertCategoryDTO updateCategoryDto) {
 		
 		try {
 			CategoryDTO categoryDto = service.updateCategory(id, updateCategoryDto);

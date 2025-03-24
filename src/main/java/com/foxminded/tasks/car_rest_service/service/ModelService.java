@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.UpsertModelDTO;
 import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
@@ -96,7 +96,7 @@ public class ModelService {
 		return mapper.modelToDto(model);
 	}
 	
-	public ModelDTO createModel(CreateUpdateModelDTO createModelDto) {
+	public ModelDTO createModel(UpsertModelDTO createModelDto) {
 		
 		if(!existsByName(createModelDto.getName())) {
 			
@@ -109,7 +109,7 @@ public class ModelService {
 		}	
 	}
 	
-	public ModelDTO updateModel(Long id, CreateUpdateModelDTO updateModelDto) {
+	public ModelDTO updateModel(Long id, UpsertModelDTO updateModelDto) {
 		
 		Model modelToUpdate = findById(id);
 		modelToUpdate.setName(updateModelDto.getName());

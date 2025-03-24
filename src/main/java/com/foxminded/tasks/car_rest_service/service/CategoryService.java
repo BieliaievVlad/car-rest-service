@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
-import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.UpsertCategoryDTO;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
@@ -96,7 +96,7 @@ public class CategoryService {
 		return mapper.categoryToDto(category);
 	}
 	
-	public CategoryDTO createCategory(CreateUpdateCategoryDTO createCategoryDto) {
+	public CategoryDTO createCategory(UpsertCategoryDTO createCategoryDto) {
 		
 		if(!existsByName(createCategoryDto.getName())) {
 			
@@ -110,7 +110,7 @@ public class CategoryService {
 		}	
 	}
 	
-	public CategoryDTO updateCategory(Long id, CreateUpdateCategoryDTO updateCategoryDto) {
+	public CategoryDTO updateCategory(Long id, UpsertCategoryDTO updateCategoryDto) {
 		
 		Category categoryToUpdate = findById(id);
 		categoryToUpdate.setName(updateCategoryDto.getName());

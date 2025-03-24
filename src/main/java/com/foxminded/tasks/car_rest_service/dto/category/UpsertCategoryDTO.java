@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateUpdateCategoryDTO {
+public class UpsertCategoryDTO {
 
 	private String name;
 }

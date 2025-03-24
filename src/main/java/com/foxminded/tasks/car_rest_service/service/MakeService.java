@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.foxminded.tasks.car_rest_service.dto.make.CreateUpdateMakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.UpsertMakeDTO;
 import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
@@ -94,7 +94,7 @@ public class MakeService {
 		return mapper.makeToDto(make);
 	}
 	
-	public MakeDTO createMake(CreateUpdateMakeDTO createMakeDto) {
+	public MakeDTO createMake(UpsertMakeDTO createMakeDto) {
 		
 		if(!existsByName(createMakeDto.getName())) {
 
@@ -107,7 +107,7 @@ public class MakeService {
 		}	
 	}
 	
-	public MakeDTO updateMake(Long id, CreateUpdateMakeDTO updateMakeDto) {
+	public MakeDTO updateMake(Long id, UpsertMakeDTO updateMakeDto) {
 		
 		Make makeToUpdate = findById(id);
 		makeToUpdate.setName(updateMakeDto.getName());

@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
-import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.UpsertModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.ModelService;
@@ -91,7 +91,7 @@ class ModelControllerTest {
 		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		String modelJson = objectMapper.writeValueAsString(modelDto);
 		
-		when(service.createModel(any(CreateUpdateModelDTO.class))).thenReturn(modelDto);
+		when(service.createModel(any(UpsertModelDTO.class))).thenReturn(modelDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models")
         		.contentType("application/json")
@@ -100,13 +100,13 @@ class ModelControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).createModel(any(CreateUpdateModelDTO.class));
+        verify(service, times(1)).createModel(any(UpsertModelDTO.class));
 	}
 	
 	@Test
 	void createModel_InvalidModel_ReturnsBadRequest() throws Exception {
 	
-		when(service.createModel(any(CreateUpdateModelDTO.class))).thenThrow(new IllegalArgumentException());
+		when(service.createModel(any(UpsertModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
@@ -119,7 +119,7 @@ class ModelControllerTest {
 		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		String modelJson = objectMapper.writeValueAsString(modelDto);
 		
-		when(service.updateModel(anyLong(), any(CreateUpdateModelDTO.class))).thenReturn(modelDto);
+		when(service.updateModel(anyLong(), any(UpsertModelDTO.class))).thenReturn(modelDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id)
         		.contentType("application/json")
@@ -128,7 +128,7 @@ class ModelControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).updateModel(anyLong(), any(CreateUpdateModelDTO.class));
+        verify(service, times(1)).updateModel(anyLong(), any(UpsertModelDTO.class));
 	}
 	
 	@Test
@@ -136,7 +136,7 @@ class ModelControllerTest {
 		
 		Long id = 1L;
 		
-		when(service.updateModel(anyLong(), any(CreateUpdateModelDTO.class))).thenThrow(new IllegalArgumentException());
+		when(service.updateModel(anyLong(), any(UpsertModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.dto.model.CreateUpdateModelDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.UpsertModelDTO;
 import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
 import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.ModelService;
@@ -62,7 +62,7 @@ public class ModelController {
 	}
 	
 	@PostMapping("/models")
-	public ResponseEntity<ModelDTO> createModel(@RequestBody CreateUpdateModelDTO createModelDto) {
+	public ResponseEntity<ModelDTO> createModel(@RequestBody UpsertModelDTO createModelDto) {
 
 		try {
 			ModelDTO modelDto = service.createModel(createModelDto);
@@ -77,7 +77,7 @@ public class ModelController {
 	}
 	
 	@PutMapping("/models/{id}")
-	public ResponseEntity<ModelDTO> updateModel(@PathVariable Long id, @RequestBody CreateUpdateModelDTO updateModelDto) {
+	public ResponseEntity<ModelDTO> updateModel(@PathVariable Long id, @RequestBody UpsertModelDTO updateModelDto) {
 		
 		try {
 			ModelDTO modelDto = service.updateModel(id, updateModelDto);

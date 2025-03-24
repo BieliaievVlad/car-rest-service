@@ -18,7 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
-import com.foxminded.tasks.car_rest_service.dto.category.CreateUpdateCategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.UpsertCategoryDTO;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
 import com.foxminded.tasks.car_rest_service.repository.CategoryRepository;
@@ -151,7 +151,7 @@ class CategoryServiceTest {
 	void createCategory_ValidValue_CalledMethodAndReturnsExpected() {
 		
 		Category category = new Category(1L, "Name");
-		CreateUpdateCategoryDTO createDto = new CreateUpdateCategoryDTO("Name");
+		UpsertCategoryDTO createDto = new UpsertCategoryDTO("Name");
 		CategoryDTO expected = new CategoryDTO(1L, "Name");
 		
 		when(repository.existsByName(anyString())).thenReturn(false);
@@ -169,7 +169,7 @@ class CategoryServiceTest {
 	@Test
 	void createCategory_InvalidValue_CalledMethodAndReturnsExpected() {
 
-		CreateUpdateCategoryDTO categoryDto = new CreateUpdateCategoryDTO("Name");
+		UpsertCategoryDTO categoryDto = new UpsertCategoryDTO("Name");
 		
 		when(repository.existsByName(anyString())).thenReturn(true);
 		
@@ -184,7 +184,7 @@ class CategoryServiceTest {
 		
 		Long id = 1L;
 		Category category = new Category(1L, "Name");
-		CreateUpdateCategoryDTO updateDto = new CreateUpdateCategoryDTO("Name");
+		UpsertCategoryDTO updateDto = new UpsertCategoryDTO("Name");
 		CategoryDTO expected = new CategoryDTO(1L, "Category_Name");
 		
 		when(repository.findById(anyLong())).thenReturn(Optional.of(category));

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.foxminded.tasks.car_rest_service.dto.make.CreateUpdateMakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.UpsertMakeDTO;
 import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
 import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.MakeService;
@@ -62,7 +62,7 @@ public class MakeController {
 	}
 	
 	@PostMapping("/makes")
-	public ResponseEntity<MakeDTO> createMake(@RequestBody CreateUpdateMakeDTO createMakeDto) {
+	public ResponseEntity<MakeDTO> createMake(@RequestBody UpsertMakeDTO createMakeDto) {
 
 		try {
 			MakeDTO makeDto = service.createMake(createMakeDto);
@@ -77,7 +77,7 @@ public class MakeController {
 	}
 	
 	@PutMapping("/makes/{id}")
-	public ResponseEntity<MakeDTO> updateMake(@PathVariable Long id, @RequestBody CreateUpdateMakeDTO updateMakeDto) {
+	public ResponseEntity<MakeDTO> updateMake(@PathVariable Long id, @RequestBody UpsertMakeDTO updateMakeDto) {
 		
 		try {
 			MakeDTO makeDto = service.updateMake(id, updateMakeDto);

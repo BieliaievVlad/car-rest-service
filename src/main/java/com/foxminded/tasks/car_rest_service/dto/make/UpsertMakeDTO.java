@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateUpdateMakeDTO {
+public class UpsertMakeDTO {
 
 	private String name;
 }

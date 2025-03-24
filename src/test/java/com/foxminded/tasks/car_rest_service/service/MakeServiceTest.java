@@ -21,7 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
-import com.foxminded.tasks.car_rest_service.dto.make.CreateUpdateMakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.UpsertMakeDTO;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
 import com.foxminded.tasks.car_rest_service.repository.MakeRepository;
@@ -154,7 +154,7 @@ class MakeServiceTest {
 	void createMake_ValidValue_CalledMethodAndReturnsExpected() {
 		
 		Make make = new Make(1L, "Name");
-		CreateUpdateMakeDTO createDto = new CreateUpdateMakeDTO("Name");
+		UpsertMakeDTO createDto = new UpsertMakeDTO("Name");
 		MakeDTO expected = new MakeDTO(1L, "Name");
 		
 		when(repository.existsByName(anyString())).thenReturn(false);
@@ -172,7 +172,7 @@ class MakeServiceTest {
 	@Test
 	void createMake_InvalidValue_CalledMethodAndReturnsExpected() {
 
-		CreateUpdateMakeDTO makeDto = new CreateUpdateMakeDTO("Name");
+		UpsertMakeDTO makeDto = new UpsertMakeDTO("Name");
 		
 		when(repository.existsByName(anyString())).thenReturn(true);
 		
@@ -187,7 +187,7 @@ class MakeServiceTest {
 		
 		Long id = 1L;
 		Make make = new Make(1L, "Name");
-		CreateUpdateMakeDTO updateDto = new CreateUpdateMakeDTO("Name");
+		UpsertMakeDTO updateDto = new UpsertMakeDTO("Name");
 		MakeDTO expected = new MakeDTO(1L, "Make_Name");
 		
 		when(repository.findById(anyLong())).thenReturn(Optional.of(make));
