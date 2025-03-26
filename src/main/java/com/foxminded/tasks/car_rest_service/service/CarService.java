@@ -20,11 +20,17 @@ import com.foxminded.tasks.car_rest_service.dto.car.CarDTO;
 import com.foxminded.tasks.car_rest_service.dto.car.CarListItemDTO;
 import com.foxminded.tasks.car_rest_service.dto.car.CreateCarDTO;
 import com.foxminded.tasks.car_rest_service.dto.car.UpdateCarDTO;
+import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
+import com.foxminded.tasks.car_rest_service.dto.make.MakeDTO;
+import com.foxminded.tasks.car_rest_service.dto.model.ModelDTO;
 import com.foxminded.tasks.car_rest_service.entity.Car;
 import com.foxminded.tasks.car_rest_service.entity.Category;
 import com.foxminded.tasks.car_rest_service.entity.Make;
 import com.foxminded.tasks.car_rest_service.entity.Model;
 import com.foxminded.tasks.car_rest_service.mapper.CarMapper;
+import com.foxminded.tasks.car_rest_service.mapper.CategoryMapper;
+import com.foxminded.tasks.car_rest_service.mapper.MakeMapper;
+import com.foxminded.tasks.car_rest_service.mapper.ModelMapper;
 import com.foxminded.tasks.car_rest_service.repository.CarRepository;
 import com.foxminded.tasks.car_rest_service.specification.CarSpecification;
 
@@ -38,6 +44,9 @@ public class CarService {
 	private ModelService modelService;
 	private CategoryService categoryService;
 	private final CarMapper mapper;
+	private final MakeMapper makeMapper;
+	private final ModelMapper modelMapper;
+	private final CategoryMapper categoryMapper;
 	Logger logger = LoggerFactory.getLogger(CarService.class);
 
 	@Autowired
@@ -45,69 +54,43 @@ public class CarService {
 					  MakeService makeService,
 					  ModelService modelService,
 					  CategoryService categoryService,
-					  CarMapper mapper) {
+					  CarMapper mapper,
+					  MakeMapper makeMapper,
+					  ModelMapper modelMapper,
+					  CategoryMapper categoryMapper) {
 		this.carRepository = carRepository;
 		this.makeService = makeService;
 		this.modelService = modelService;
 		this.categoryService = categoryService;
 		this.mapper = mapper;
-	}
-
-	public List<Car> findAll() {
-		
-		return carRepository.findAll();
-	}
-
-	public Car findById(Long id) {
-
-		Optional<Car> optCar = carRepository.findById(id);
-
-		if (optCar.isPresent()) {
-			return optCar.get();
-
-		} else {
-			logger.error("Car with id {} is not found.", id);
-			throw new EntityNotFoundException();
-
-		}
-	}
-
-	public Car save(Car car) {
-
-		if (!isCarValid(car)) {
-			logger.error("Save error. Car is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			return carRepository.save(car);
-		}
-
-	}
-
-	public void delete(Car car) {
-
-		if (!isCarValid(car)) {
-			logger.error("Delete error. Car is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			carRepository.delete(car);
-		}
-
+		this.makeMapper = makeMapper;
+		this.modelMapper = modelMapper;
+		this.categoryMapper = categoryMapper;
 	}
 	
 	public CarDTO findCarById(Long id) {
 		
-		Car car = findById(id);
+		Optional<Car> optCar = carRepository.findById(id);
 		
-		return mapper.carToCarDto(car);
+		if(!optCar.isEmpty()) {
+			
+			return mapper.carToCarDto(optCar.get());
+			
+		} else {
+			logger.error("Car with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}
+		
 	}
 	
 	public CarDTO createCar(CreateCarDTO createCarDto) {
 
-		Make make = makeService.findByNameOrSaveNew(createCarDto.getMake());
-		Model model = modelService.findByNameOrSaveNew(createCarDto.getModel());
-		Category category = categoryService.findByNameOrSaveNew(createCarDto.getCategory());
+		MakeDTO makeDto = makeService.findByNameOrSaveNew(createCarDto.getMake());
+		Make make = makeMapper.dtoToMake(makeDto);
+		ModelDTO modelDto = modelService.findByNameOrSaveNew(createCarDto.getModel());
+		Model model = modelMapper.dtoToModel(modelDto);
+		CategoryDTO categoryDto = categoryService.findByNameOrSaveNew(createCarDto.getCategory());
+		Category category = categoryMapper.dtoToCategory(categoryDto);
 		Year year = Year.of(createCarDto.getYear());
 		String objectId = createCarDto.getObjectId();
 		
@@ -115,38 +98,54 @@ public class CarService {
 			objectId = generateObjectId();
 		}
 		
-		Car newCar = save(new Car(make, model, category, year, objectId));
+		Car newCar = carRepository.save(new Car(make, model, category, year, objectId));
 		
 		return mapper.carToCarDto(newCar);		
 	}
 	
 	public CarDTO updateCar(Long id, UpdateCarDTO updateCarDto) {
 		
-		Car carToUpdate = findById(id);
-		Make makeToUpdate = carToUpdate.getMake();
-		Model modelToUpdate = carToUpdate.getModel();
-		Category categoryToUpdate = carToUpdate.getCategory();
+		Optional<Car> optCarToUpdate = carRepository.findById(id);
 		
-		makeToUpdate.setName(updateCarDto.getMake());
-		modelToUpdate.setName(updateCarDto.getModel());
-		categoryToUpdate.setName(updateCarDto.getCategory());
-		Year updatedYear = Year.of(updateCarDto.getYear());
-		
-		carToUpdate.setMake(makeToUpdate);
-		carToUpdate.setModel(modelToUpdate);
-		carToUpdate.setCategory(categoryToUpdate);
-		carToUpdate.setYear(updatedYear);
-		
-		Car updatedCar = save(carToUpdate);
-		
-		return mapper.carToCarDto(updatedCar);
+		if(!optCarToUpdate.isEmpty()) {
+			
+			Car carToUpdate = optCarToUpdate.get();
+			Make makeToUpdate = carToUpdate.getMake();
+			Model modelToUpdate = carToUpdate.getModel();
+			Category categoryToUpdate = carToUpdate.getCategory();
+			
+			makeToUpdate.setName(updateCarDto.getMake());
+			modelToUpdate.setName(updateCarDto.getModel());
+			categoryToUpdate.setName(updateCarDto.getCategory());
+			Year updatedYear = Year.of(updateCarDto.getYear());
+			
+			carToUpdate.setMake(makeToUpdate);
+			carToUpdate.setModel(modelToUpdate);
+			carToUpdate.setCategory(categoryToUpdate);
+			carToUpdate.setYear(updatedYear);
+			
+			Car updatedCar = carRepository.save(carToUpdate);
+			
+			return mapper.carToCarDto(updatedCar);
+			
+		} else {
+			logger.error("Car with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}
+
 	}
 	
-	public void deleteCarById(Long id) {
+	public void delete(Long id) {
 		
-		Car car = findById(id);
-
-		delete(car);
+		Optional<Car> optCar = carRepository.findById(id);
+		
+		if(!optCar.isEmpty()) {
+			carRepository.delete(optCar.get());
+			
+		} else {
+			logger.error("Car with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}	
 	}
 
 	public Page<CarListItemDTO> filterCars(String makeName, String modelName, String categoryName, Integer year,
@@ -175,52 +174,37 @@ public class CarService {
 		return new PageImpl<>(carsListDto, pageable, carsPage.getTotalElements());
 	}
 	
-	public List<Car> findByMake(Make make) {
-		return carRepository.findByMake(make);
-	}
-	
-	public List<Car> findByModel(Model model) {
-		return carRepository.findByModel(model);
-	}
-	
-	public List<Car> findByCategory(Category category) {
-		return carRepository.findByCategory(category);
-	}
-	
 	public void deleteMakeAndAssociations(Long id) {
-		
-		Make make = makeService.findById(id);
-		List<Car> cars = findByMake(make);
+
+		List<Car> cars = carRepository.findByMake_Id(id);
 		
 		for (Car c : cars) {
-			delete(c);
+			carRepository.delete(c);
 		}
 		
-		makeService.delete(make);
+		makeService.delete(id);
 	}
 	
 	public void deleteModelAndAssociations(Long id) {
-		
-		Model model = modelService.findById(id);
-		List<Car> cars = findByModel(model);
+
+		List<Car> cars = carRepository.findByModel_Id(id);
 		
 		for (Car c : cars) {
-			delete(c);
+			carRepository.delete(c);
 		}
 		
-		modelService.delete(model);
+		modelService.delete(id);
 	}
 	
 	public void deleteCategoryAndAssociations(Long id) {
-		
-		Category category = categoryService.findById(id);
-		List<Car> cars = findByCategory(category);
+
+		List<Car> cars = carRepository.findByCategory_Id(id);
 		
 		for (Car c : cars) {
-			delete(c);
+			carRepository.delete(c);
 		}
 		
-		categoryService.delete(category);
+		categoryService.delete(id);
 	}
 	
 	public String generateObjectId() {
@@ -236,14 +220,5 @@ public class CarService {
         } while (carRepository.existsByObjectId(objectId));
         
         return objectId;
-	}
-	
-	private boolean isCarValid(Car car) {
-		return car != null && 
-			   car.getMake() != null && 
-			   car.getModel() != null && 
-			   car.getCategory() != null && 
-			   car.getYear() != null && 
-			   car.getObjectId() != null;
 	}
 }

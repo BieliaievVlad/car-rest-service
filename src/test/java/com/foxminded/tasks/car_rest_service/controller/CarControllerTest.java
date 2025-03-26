@@ -154,29 +154,29 @@ class CarControllerTest {
 	}
 
 	@Test
-	void deleteCar_ValidId_ReturnsNoContent() throws Exception {
+	void delete_ValidId_ReturnsNoContent() throws Exception {
 		
 		Long id = 1L;
 		
-		doNothing().when(service).deleteCarById(anyLong());
+		doNothing().when(service).delete(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/cars/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isNoContent());
 		
-		verify(service, times(1)).deleteCarById(anyLong());
+		verify(service, times(1)).delete(anyLong());
 	}
 	
 	@Test
-	void deleteCar_InvalidId_ReturnsBadRequest() throws Exception {
+	void delete_InvalidId_ReturnsBadRequest() throws Exception {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(service).deleteCarById(anyLong());
+		doThrow(new IllegalArgumentException()).when(service).delete(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/cars/{id}", id))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 		
-		verify(service, times(1)).deleteCarById(anyLong());
+		verify(service, times(1)).delete(anyLong());
 	}
 
 }

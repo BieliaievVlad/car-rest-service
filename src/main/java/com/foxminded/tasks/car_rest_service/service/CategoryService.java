@@ -35,72 +35,38 @@ public class CategoryService {
 		this.mapper = mapper;
 	}
 	
-	public List<Category> findAll() {
-		
-		return categoryRepository.findAll();
-	}
-	
-	public Category findById(Long id) {
-
-		Optional<Category> optCategory = categoryRepository.findById(id);
-
-		if (optCategory.isPresent()) {
-			return optCategory.get();
-
-		} else {
-			logger.error("Category with id {} is not found.", id);
-			throw new EntityNotFoundException();
-		}
-
-	}
-	
-	public Category save(Category category) {
-
-		if (!isCategoryValid(category)) {
-			logger.error("Save error. Category is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			return categoryRepository.save(category);
-		}
-
-	}
-	
-	public void delete(Category category) {
-
-		if (!isCategoryValid(category)) {
-			logger.error("Delete error. Category is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			categoryRepository.delete(category);
-		}
-
-	}
-	
 	public boolean existsByName(String name) {
 		
 		return categoryRepository.existsByName(name);
 	}
 	
-	public Category findByNameOrSaveNew(String name) {
+	public CategoryDTO findByNameOrSaveNew(String name) {
 		
-		return categoryRepository.findByName(name)
+		Category category = categoryRepository.findByName(name)
 				.orElseGet(() -> categoryRepository.save(new Category(name)));
-	}
-	
-	public CategoryDTO findCategoryById(Long id) {
-		
-		Category category = findById(id);
 		
 		return mapper.categoryToDto(category);
+	}
+	
+	public CategoryDTO findById(Long id) {
+		
+		Optional<Category> optCategory = categoryRepository.findById(id);
+		
+		if(!optCategory.isEmpty()) {
+			
+			return mapper.categoryToDto(optCategory.get());
+			
+		} else {
+			logger.error("Category with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}	
 	}
 	
 	public CategoryDTO createCategory(UpsertCategoryDTO createCategoryDto) {
 		
 		if(!existsByName(createCategoryDto.getName())) {
 			
-			Category newCategory = save(new Category(createCategoryDto.getName()));
+			Category newCategory = categoryRepository.save(new Category(createCategoryDto.getName()));
 			
 			return mapper.categoryToDto(newCategory);
 			
@@ -112,11 +78,27 @@ public class CategoryService {
 	
 	public CategoryDTO updateCategory(Long id, UpsertCategoryDTO updateCategoryDto) {
 		
-		Category categoryToUpdate = findById(id);
-		categoryToUpdate.setName(updateCategoryDto.getName());
-		Category updatedCategory = save(categoryToUpdate);
+		Optional<Category> optCategoryToUpdate = categoryRepository.findById(id);
 		
-		return mapper.categoryToDto(updatedCategory);
+		if(!optCategoryToUpdate.isEmpty()) {
+			
+			Category categoryToUpdate = optCategoryToUpdate.get();
+			categoryToUpdate.setName(updateCategoryDto.getName());
+			Category updatedCategory = categoryRepository.save(categoryToUpdate);
+			
+			return mapper.categoryToDto(updatedCategory);
+			
+		} else {
+			logger.error("Category with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}
+	}
+	
+	public void delete(Long id) {
+		
+		CategoryDTO categoryDto = findById(id);
+		Category category = mapper.dtoToCategory(categoryDto);
+		categoryRepository.delete(category);
 	}
 		
 	public Page<CategoryDTO> filterCategories(String name, Pageable pageable) {
@@ -134,11 +116,5 @@ public class CategoryService {
 				.collect(Collectors.toList());
 		
 		return new PageImpl<>(categoriesDto, pageable, categoriesPage.getTotalElements());
-	}
-	
-	private boolean isCategoryValid(Category category) {
-		
-		return category != null &&
-			   category.getName() != null;
 	}
 }

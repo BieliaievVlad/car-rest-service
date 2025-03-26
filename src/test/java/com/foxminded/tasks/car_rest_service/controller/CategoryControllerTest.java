@@ -62,13 +62,13 @@ class CategoryControllerTest {
 		Long id = 1L;
 		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
 		
-		when(service.findCategoryById(anyLong())).thenReturn(categoryDto);
+		when(service.findById(anyLong())).thenReturn(categoryDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/categories/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).findCategoryById(anyLong());
+        verify(service, times(1)).findById(anyLong());
 	}
 	
 	@Test
@@ -76,12 +76,12 @@ class CategoryControllerTest {
 		
 		Long id = 1L;
 		
-		when(service.findCategoryById(anyLong())).thenThrow(new EntityNotFoundException());
+		when(service.findById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/categories/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
         
-        verify(service, times(1)).findCategoryById(anyLong());
+        verify(service, times(1)).findById(anyLong());
 	}
 
 	@Test

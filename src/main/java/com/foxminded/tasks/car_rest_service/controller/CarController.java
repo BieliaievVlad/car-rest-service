@@ -99,7 +99,7 @@ public class CarController {
 		
 		try {
 
-			service.deleteCarById(id);
+			service.delete(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (IllegalArgumentException e) {

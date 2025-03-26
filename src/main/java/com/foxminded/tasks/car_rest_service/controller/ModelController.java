@@ -50,7 +50,7 @@ public class ModelController {
 	public ResponseEntity<ModelDTO> getModel(@PathVariable Long id) {
 		
 		try {
-			ModelDTO modelDto = service.findModelById(id);
+			ModelDTO modelDto = service.findById(id);
 			return new ResponseEntity<>(modelDto, HttpStatus.OK);
 			
 		} catch (EntityNotFoundException e) {

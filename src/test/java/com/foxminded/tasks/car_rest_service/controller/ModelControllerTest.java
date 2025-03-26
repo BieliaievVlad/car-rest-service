@@ -63,13 +63,13 @@ class ModelControllerTest {
 		Long id = 1L;
 		ModelDTO modelDto = new ModelDTO(1L, "Name");
 		
-		when(service.findModelById(anyLong())).thenReturn(modelDto);
+		when(service.findById(anyLong())).thenReturn(modelDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/models/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).findModelById(anyLong());
+        verify(service, times(1)).findById(anyLong());
 	}
 	
 	@Test
@@ -77,12 +77,12 @@ class ModelControllerTest {
 		
 		Long id = 1L;
 		
-		when(service.findModelById(anyLong())).thenThrow(new EntityNotFoundException());
+		when(service.findById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/models/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
         
-        verify(service, times(1)).findModelById(anyLong());
+        verify(service, times(1)).findById(anyLong());
 	}
 
 	@Test

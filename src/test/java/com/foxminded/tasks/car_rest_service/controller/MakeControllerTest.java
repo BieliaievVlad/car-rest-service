@@ -62,13 +62,13 @@ class MakeControllerTest {
 		Long id = 1L;
 		MakeDTO makeDto = new MakeDTO(1L, "Name");
 		
-		when(service.findMakeById(anyLong())).thenReturn(makeDto);
+		when(service.findById(anyLong())).thenReturn(makeDto);
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/makes/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
         
-        verify(service, times(1)).findMakeById(anyLong());
+        verify(service, times(1)).findById(anyLong());
 	}
 	
 	@Test
@@ -76,12 +76,12 @@ class MakeControllerTest {
 		
 		Long id = 1L;
 		
-		when(service.findMakeById(anyLong())).thenThrow(new EntityNotFoundException());
+		when(service.findById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/makes/{id}", id))
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
         
-        verify(service, times(1)).findMakeById(anyLong());
+        verify(service, times(1)).findById(anyLong());
 	}
 
 	@Test

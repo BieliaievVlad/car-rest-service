@@ -36,58 +36,6 @@ class CategoryServiceTest {
 	CategoryService service;
 
 	@Test
-	void findAll_ValidValue_CalledMethodAndReturnsExpected() {
-		
-		List<Category> expected = List.of(new Category(1L, "Category_Name"));
-		
-		when(repository.findAll()).thenReturn(expected);
-		
-		List<Category> actual = service.findAll();
-		
-		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-		verify(repository, times(1)).findAll();
-	}
-
-	@Test
-	void findById_ValidValue_CalledMethodAndReturnsExpected() {
-		
-		Long id = 1L;
-		Category expected = new Category(1L, "Category_Name");
-		
-		when(repository.findById(anyLong())).thenReturn(Optional.of(expected));
-		
-		Category actual = service.findById(id);
-		
-		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-		verify(repository, times(1)).findById(anyLong());
-	}
-
-	@Test
-	void save_ValidValue_CalledMethodAndReturnsExpected() {
-		
-		Category expected = new Category(1L, "Category_Name");
-		
-		when(repository.save(any(Category.class))).thenReturn(expected);
-		
-		Category actual = service.save(expected);
-		
-		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-		verify(repository, times(1)).save(any(Category.class));
-	}
-
-	@Test
-	void delete_ValidValue_CalledMethod() {
-		
-		Category category = new Category(1L, "Category_Name");
-		
-		doNothing().when(repository).delete(any(Category.class));
-		
-		service.delete(category);
-		
-		verify(repository, times(1)).delete(any(Category.class));
-	}
-
-	@Test
 	void existsByName_ValidValue_CalledMethodAndReturnsExpected() {
 		
 		String name = "Name";
@@ -104,34 +52,40 @@ class CategoryServiceTest {
 	void findByNameOrSaveNew_CategoryExists_CalledMethodAndReturnsExpected() {
 		
 		String name = "Category_Name";
-		Category expected = new Category(1L, "Category_Name");
+		Category category = new Category(1L, "Category_Name");
+		CategoryDTO expected = new CategoryDTO(1L, "Category_Name");
 		
-		when(repository.findByName(anyString())).thenReturn(Optional.of(expected));
+		when(repository.findByName(anyString())).thenReturn(Optional.of(category));
+		when(mapper.categoryToDto(any(Category.class))).thenReturn(expected);
 		
-		Category actual = service.findByNameOrSaveNew(name);
+		CategoryDTO actual = service.findByNameOrSaveNew(name);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findByName(anyString());
+		verify(mapper, times(1)).categoryToDto(any(Category.class));
 	}
 	
 	@Test
 	void findByNameOrSaveNew_CategoryNotExists_CalledMethodAndReturnsExpected() {
 		
 		String name = "Category_Name";
-		Category expected = new Category(1L, "Category_Name");
+		Category category = new Category(1L, "Category_Name");
+		CategoryDTO expected = new CategoryDTO(1L, "Category_Name");
 		
 		when(repository.findByName(anyString())).thenReturn(Optional.empty());
-		when(repository.save(any(Category.class))).thenReturn(expected);
+		when(repository.save(any(Category.class))).thenReturn(category);
+		when(mapper.categoryToDto(any(Category.class))).thenReturn(expected);
 		
-		Category actual = service.findByNameOrSaveNew(name);
+		CategoryDTO actual = service.findByNameOrSaveNew(name);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findByName(anyString());
 		verify(repository, times(1)).save(any(Category.class));
+		verify(mapper, times(1)).categoryToDto(any(Category.class));
 	}
 	
 	@Test
-	void findCategoryById_ValidId_CalledMethodsAndReturnsExpected() {
+	void findById_ValidId_CalledMethodsAndReturnsExpected() {
 		
 		long id = 1L;
 		Category category = new Category(1L, "Name");
@@ -140,7 +94,7 @@ class CategoryServiceTest {
 		when(repository.findById(anyLong())).thenReturn(Optional.of(category));
 		when(mapper.categoryToDto(any(Category.class))).thenReturn(expected);
 		
-		CategoryDTO actual = service.findCategoryById(id);
+		CategoryDTO actual = service.findById(id);
 		
 		assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 		verify(repository, times(1)).findById(anyLong());
@@ -197,6 +151,26 @@ class CategoryServiceTest {
 		verify(repository, times(1)).findById(anyLong());
 		verify(repository, times(1)).save(any(Category.class));
 		verify(mapper, times(1)).categoryToDto(any(Category.class));
+	}
+	
+	@Test
+	void delete_ValidId_CalledMethods() {
+		
+		Long id = 1L;
+		CategoryDTO categoryDto = new CategoryDTO(1L, "Name");
+		Category category = new Category(1L, "Name");
+		
+		when(repository.findById(anyLong())).thenReturn(Optional.of(category));
+		when(mapper.categoryToDto(any(Category.class))).thenReturn(categoryDto);
+		when(mapper.dtoToCategory(any(CategoryDTO.class))).thenReturn(category);
+		doNothing().when(repository).delete(any(Category.class));
+		
+		service.delete(id);
+		
+		verify(repository, times(1)).findById(anyLong());
+		verify(mapper, times(1)).categoryToDto(any(Category.class));
+		verify(mapper, times(1)).dtoToCategory(any(CategoryDTO.class));
+		verify(repository, times(1)).delete(any(Category.class));
 	}
 
 	@Test

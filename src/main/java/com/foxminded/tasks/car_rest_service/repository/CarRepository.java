@@ -16,7 +16,7 @@ public interface CarRepository extends JpaRepository<Car, Long>, JpaSpecificatio
 
 	boolean existsByObjectId(String objectId);
 
-	List<Car> findByMake(Make make);
-	List<Car> findByModel(Model model);
-	List<Car> findByCategory(Category category);
+	List<Car> findByMake_Id(Long id);
+	List<Car> findByModel_Id(Long id);
+	List<Car> findByCategory_Id(Long id);
 }

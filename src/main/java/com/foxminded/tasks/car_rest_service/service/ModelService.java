@@ -34,73 +34,39 @@ public class ModelService {
 		this.modelRepository = modelRepository;
 		this.mapper = mapper;
 	}
-	
-	public List<Model> findAll() {
-		
-		return modelRepository.findAll();
-	}
-	
-	public Model findById(Long id) {
 
-		Optional<Model> optModel = modelRepository.findById(id);
-
-		if (optModel.isPresent()) {
-			return optModel.get();
-
-		} else {
-			logger.error("Model with id {} is not found.", id);
-			throw new EntityNotFoundException();
-		}
-
-	}
-	
-	public Model save(Model model) {
-		
-		if (!isModelValid(model)) {
-			logger.error("Save error. Model is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			return modelRepository.save(model);
-		}
-
-	}
-	
-	public void delete(Model model) {
-		
-		if (!isModelValid(model)) {
-			logger.error("Delete error. Model is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			modelRepository.delete(model);
-		}
-
-	}
-	
 	public boolean existsByName(String name) {
 		
 		return modelRepository.existsByName(name);
 	}
 	
-	public Model findByNameOrSaveNew(String name) {
+	public ModelDTO findByNameOrSaveNew(String name) {
 		
-		return modelRepository.findByName(name)
+		Model model = modelRepository.findByName(name)
 				.orElseGet(() -> modelRepository.save(new Model(name)));
-	}
-	
-	public ModelDTO findModelById(Long id) {
-		
-		Model model = findById(id);
 		
 		return mapper.modelToDto(model);
+	}
+	
+	public ModelDTO findById(Long id) {
+		
+		Optional<Model> optModel = modelRepository.findById(id);
+		
+		if(!optModel.isEmpty()) {
+			
+			return mapper.modelToDto(optModel.get());
+			
+		} else {
+			logger.error("Model with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}	
 	}
 	
 	public ModelDTO createModel(UpsertModelDTO createModelDto) {
 		
 		if(!existsByName(createModelDto.getName())) {
 			
-			Model newModel = save(new Model(createModelDto.getName()));
+			Model newModel = modelRepository.save(new Model(createModelDto.getName()));
 			return mapper.modelToDto(newModel);
 			
 		} else {
@@ -111,11 +77,27 @@ public class ModelService {
 	
 	public ModelDTO updateModel(Long id, UpsertModelDTO updateModelDto) {
 		
-		Model modelToUpdate = findById(id);
-		modelToUpdate.setName(updateModelDto.getName());
-		Model updatedModel = save(modelToUpdate);
+		Optional<Model> optModelToUpdate = modelRepository.findById(id);
 		
-		return mapper.modelToDto(updatedModel);
+		if(!optModelToUpdate.isEmpty()) {
+			
+			Model modelToUpdate = optModelToUpdate.get();
+			modelToUpdate.setName(updateModelDto.getName());
+			Model updatedModel = modelRepository.save(modelToUpdate);
+			
+			return mapper.modelToDto(updatedModel);
+			
+		} else {
+			logger.error("Model with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}
+	}
+	
+	public void delete(Long id) {
+		
+		ModelDTO modelDto = findById(id);
+		Model model = mapper.dtoToModel(modelDto);
+		modelRepository.delete(model);
 	}
 		
 	public Page<ModelDTO> filterModels (String name, Pageable pageable) {
@@ -134,11 +116,4 @@ public class ModelService {
 		
 		return new PageImpl<>(modelsDto, pageable, modelsPage.getTotalElements());
 	}
-	
-	private boolean isModelValid(Model model) {
-		
-		return model != null &&
-			   model.getName() != null;
-	}
-
 }

@@ -34,71 +34,39 @@ public class MakeService {
 		this.makeRepository = makeRepository;
 		this.mapper = makeMapper;
 	}
-	
-	public List<Make> findAll() {
-		return makeRepository.findAll();
-	}
-	
-	public Make findById(Long id) {
 
-		Optional<Make> optMake = makeRepository.findById(id);
-
-		if (optMake.isPresent()) {
-			return optMake.get();
-
-		} else {
-			logger.error("Make with id {} is not found.", id);
-			throw new EntityNotFoundException();
-		}
-
-	}
-	
-	public Make save(Make make) {
-		
-		if (!isMakeValid(make)) {
-			logger.error("Save error. Make is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			return makeRepository.save(make);
-		}
-
-	}
-	
-	public void delete(Make make) {
-		
-		if (!isMakeValid(make)) {
-			logger.error("Delete error. Make is not valid.");
-			throw new IllegalArgumentException();
-
-		} else {
-			makeRepository.delete(make);
-		}
-	}
-	
 	public boolean existsByName(String name) {
 		
 		return makeRepository.existsByName(name);
 	}
 	
-	public Make findByNameOrSaveNew(String name) {
+	public MakeDTO findByNameOrSaveNew(String name) {
 		
-		return makeRepository.findByName(name)
-				.orElseGet(() -> makeRepository.save(new Make(name)));		
+		Make make = makeRepository.findByName(name)
+				.orElseGet(() -> makeRepository.save(new Make(name)));
+		
+		return 	mapper.makeToDto(make);	
 	}
 	
-	public MakeDTO findMakeById(Long id) {
+	public MakeDTO findById(Long id) {
 		
-		Make make = findById(id);
+		Optional<Make> optMake = makeRepository.findById(id);
 		
-		return mapper.makeToDto(make);
+		if(!optMake.isEmpty()) {
+			
+			return mapper.makeToDto(optMake.get());
+			
+		} else {
+			logger.error("Make with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}	
 	}
 	
 	public MakeDTO createMake(UpsertMakeDTO createMakeDto) {
 		
 		if(!existsByName(createMakeDto.getName())) {
 
-			Make newMake = save(new Make(createMakeDto.getName()));
+			Make newMake = makeRepository.save(new Make(createMakeDto.getName()));
 			return mapper.makeToDto(newMake);
 			
 		} else {
@@ -109,11 +77,27 @@ public class MakeService {
 	
 	public MakeDTO updateMake(Long id, UpsertMakeDTO updateMakeDto) {
 		
-		Make makeToUpdate = findById(id);
-		makeToUpdate.setName(updateMakeDto.getName());
-		Make updatedMake = save(makeToUpdate);
+		Optional<Make> optMakeToUpdate = makeRepository.findById(id);
 		
-		return mapper.makeToDto(updatedMake);
+		if(!optMakeToUpdate.isEmpty()) {
+			
+			Make makeToUpdate = optMakeToUpdate.get();
+			makeToUpdate.setName(updateMakeDto.getName());
+			Make updatedMake = makeRepository.save(makeToUpdate);
+			
+			return mapper.makeToDto(updatedMake);
+			
+		} else {
+			logger.error("Make with id {} is not found.", id);
+			throw new EntityNotFoundException();
+		}
+	}
+	
+	public void delete(Long id) {
+		
+		MakeDTO makeDto = findById(id);
+		Make make = mapper.dtoToMake(makeDto);
+		makeRepository.delete(make);
 	}
 	
 	public Page<MakeDTO> filterMakes(String name, Pageable pageable) {
@@ -131,11 +115,5 @@ public class MakeService {
 				.collect(Collectors.toList());
 			
 		return new PageImpl<>(makesDto, pageable, makesPage.getTotalElements());
-	}
-	
-	private boolean isMakeValid(Make make) {
-		
-		return make != null &&
-			   make.getName() != null;
 	}
 }

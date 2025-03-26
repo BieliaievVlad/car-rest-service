@@ -50,7 +50,7 @@ public class MakeController {
 	public ResponseEntity<MakeDTO> getMake(@PathVariable Long id) {
 		
 		try {
-			MakeDTO makeDto = service.findMakeById(id);
+			MakeDTO makeDto = service.findById(id);
 			return new ResponseEntity<>(makeDto, HttpStatus.OK);
 			
 		} catch (EntityNotFoundException e) {

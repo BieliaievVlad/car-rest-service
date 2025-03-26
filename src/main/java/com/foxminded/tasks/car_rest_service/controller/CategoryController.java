@@ -50,7 +50,7 @@ public class CategoryController {
 	public ResponseEntity<CategoryDTO> getCategory(@PathVariable Long id) {
 		
 		try {
-			CategoryDTO categoryDto = service.findCategoryById(id);
+			CategoryDTO categoryDto = service.findById(id);
 			return new ResponseEntity<>(categoryDto, HttpStatus.OK);
 			
 		} catch (EntityNotFoundException e) {
