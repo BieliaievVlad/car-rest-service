@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:postgresql:14.6:///test?currentSchema=car_service
+    username: postgres
+    password: 123456
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+      
+  flyway:
+    enabled: true
+    url: jdbc:tc:postgresql:14.6:///test?currentSchema=car_service
+    user: postgres
+    password: 123456
+    schemas: car_service
+    
+#logging:
+# level:
+#    org.dbunit: DEBUG
+#    org.dbunit.dataset: DEBUG
+#    org.dbunit.database: DEBUG
+#    org.flywaydb: DEBUG
+#    org.testcontainers: DEBUG
