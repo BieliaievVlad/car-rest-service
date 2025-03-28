@@ -38,7 +38,36 @@ For example:
 
 By default, the application is available at the following address:
 
-	http://localhost:8080
+	http://localhost:7000
+	
+## Obtaining the Bearer Token
+
+Make a **POST** request to the following URL:
+
+	https://dev-crfs6orqktz444bw.eu.auth0.com/oauth/token
+
+Set the **Content-Type** header:
+
+    Content-Type: application/json
+
+In the body of the request, include the following parameters:
+
+    {
+      "client_id": "CnfhRqnszqIpPnV0OnbXLRnyjZyOpfnM",
+      "client_secret": "AeGJnmPAbLEJRDhs4TvTSF1GeV_V7HhdhlmTLeZOULsMbcnmfoFQwQIJK8KemOBu",
+      "audience": "https://car-service.example.com",
+      "grant_type": "client_credentials"
+    }
+
+If the request is successful, you will receive a response containing the Bearer Token. Example response:
+
+    {
+      "access_token": "YOUR_ACCESS_TOKEN",
+      "expires_in": 86400,
+      "token_type": "Bearer"
+    }
+
+Copy the value from the `access_token` field — this is your Bearer Token.
 	
 ## Endpoints
 
