@@ -13,10 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.dto.category.UpsertCategoryDTO;
@@ -26,6 +29,7 @@ import com.foxminded.tasks.car_rest_service.service.CategoryService;
 import jakarta.persistence.EntityNotFoundException;
 
 @WebMvcTest(CategoryController.class)
+@WithMockUser
 class CategoryControllerTest {
 
 	@Autowired
@@ -94,7 +98,8 @@ class CategoryControllerTest {
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
         		.contentType("application/json")
-        		.content(categoryJson))
+        		.content(categoryJson)
+        		.with(csrf())) 
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
@@ -107,7 +112,8 @@ class CategoryControllerTest {
 	
 		when(service.createCategory(any(UpsertCategoryDTO.class))).thenThrow(new IllegalArgumentException());
 		
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
+        		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 	
@@ -122,7 +128,8 @@ class CategoryControllerTest {
 		
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id)
         		.contentType("application/json")
-        		.content(categoryJson))
+        		.content(categoryJson)
+        		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
@@ -137,7 +144,8 @@ class CategoryControllerTest {
 		
 		when(service.updateCategory(anyLong(), any(UpsertCategoryDTO.class))).thenThrow(new IllegalArgumentException());
 		
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id))
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id)
+        		.with(csrf()))
         .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
@@ -148,7 +156,8 @@ class CategoryControllerTest {
 		
 		doNothing().when(carService).deleteCategoryAndAssociations(anyLong());
 		
-		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/{id}", id))
+		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/{id}", id)
+				.with(csrf()))
 		.andExpect(MockMvcResultMatchers.status().isNoContent());
 		
 		verify(carService, times(1)).deleteCategoryAndAssociations(anyLong());
@@ -161,7 +170,8 @@ class CategoryControllerTest {
 		
 		doThrow(new IllegalArgumentException()).when(carService).deleteCategoryAndAssociations(anyLong());
 		
-		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/{id}", id))
+		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/{id}", id)
+				.with(csrf()))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 		
 		verify(carService, times(1)).deleteCategoryAndAssociations(anyLong());

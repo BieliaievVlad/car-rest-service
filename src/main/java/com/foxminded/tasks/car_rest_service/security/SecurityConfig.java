@@ -32,7 +32,9 @@ public class SecurityConfig {
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 				.requestMatchers(HttpMethod.GET, "/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/**").authenticated())
+				.requestMatchers(HttpMethod.POST, "/**").authenticated()
+				.requestMatchers(HttpMethod.PUT, "/**").authenticated()
+				.requestMatchers(HttpMethod.DELETE, "/**").authenticated())
 				.oauth2ResourceServer(oauth2 -> oauth2
 						.jwt(jwt -> jwt.decoder(jwtDecoder())));
 

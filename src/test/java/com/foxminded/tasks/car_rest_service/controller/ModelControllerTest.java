@@ -2,6 +2,7 @@ package com.foxminded.tasks.car_rest_service.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.util.List;
 
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -27,6 +30,7 @@ import com.foxminded.tasks.car_rest_service.service.ModelService;
 import jakarta.persistence.EntityNotFoundException;
 
 @WebMvcTest(ModelController.class)
+@WithMockUser
 class ModelControllerTest {
 
 	@Autowired
@@ -95,7 +99,8 @@ class ModelControllerTest {
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models")
         		.contentType("application/json")
-        		.content(modelJson))
+        		.content(modelJson)
+        		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
@@ -108,7 +113,8 @@ class ModelControllerTest {
 	
 		when(service.createModel(any(UpsertModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models")
+        		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 	
@@ -123,7 +129,8 @@ class ModelControllerTest {
 		
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id)
         		.contentType("application/json")
-        		.content(modelJson))
+        		.content(modelJson)
+        		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Name"));
@@ -138,7 +145,8 @@ class ModelControllerTest {
 		
 		when(service.updateModel(anyLong(), any(UpsertModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id))
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id)
+        		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
@@ -149,7 +157,8 @@ class ModelControllerTest {
 		
 		doNothing().when(carService).deleteModelAndAssociations(anyLong());
 		
-		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/models/{id}", id))
+		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/models/{id}", id)
+				.with(csrf()))
 		.andExpect(MockMvcResultMatchers.status().isNoContent());
 		
 		verify(carService, times(1)).deleteModelAndAssociations(anyLong());
@@ -162,7 +171,8 @@ class ModelControllerTest {
 		
 		doThrow(new IllegalArgumentException()).when(carService).deleteModelAndAssociations(anyLong());
 		
-		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/models/{id}", id))
+		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/models/{id}", id)
+				.with(csrf()))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 		
 		verify(carService, times(1)).deleteModelAndAssociations(anyLong());
