@@ -103,6 +103,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	POST http://localhost:8080/api/v1/cars
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"make": "LADA",
@@ -120,6 +121,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	PUT http://localhost:8080/api/v1/cars/{1}
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"make": "LADA",
@@ -135,6 +137,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/cars/1
+	Authorization: Bearer your_token_here
 	
 ### 6. Get Filtered Makes
 - **URL**: `/api/v1/makes`
@@ -165,6 +168,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	POST http://localhost:8080/api/v1/makes
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "LADA"
@@ -178,6 +182,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	PUT http://localhost:8080/api/v1/makes/1
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "LADA"
@@ -190,6 +195,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/makes/1
+	Authorization: Bearer your_token_here
 	
 ### 11. Get Filtered Models
 - **URL**: `/api/v1/models`
@@ -220,6 +226,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	POST http://localhost:8080/api/v1/models
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "KALINA"
@@ -233,6 +240,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	PUT http://localhost:8080/api/v1/models/1
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "KALINA"
@@ -245,6 +253,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/models/1
+	Authorization: Bearer your_token_here
 	
 ### 16. Get Filtered Categories
 - **URL**: `/api/v1/categories`
@@ -275,6 +284,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	POST http://localhost:8080/api/v1/categories
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "Sedan"
@@ -288,6 +298,7 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 #### Example Request:
 	PUT http://localhost:8080/api/v1/categories/1
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "Sedan"
@@ -300,3 +311,5 @@ Copy the value from the `access_token` field — this is your Bearer Token.
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/categories/1
+	Authorization: Bearer your_token_here
+	
