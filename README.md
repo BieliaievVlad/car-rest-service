@@ -38,7 +38,36 @@ For example:
 
 By default, the application is available at the following address:
 
-	http://localhost:8080
+	http://localhost:7000
+	
+## Obtaining the Bearer Token
+
+Make a **POST** request to the following URL:
+
+	https://dev-crfs6orqktz444bw.eu.auth0.com/oauth/token
+
+Set the **Content-Type** header:
+
+    Content-Type: application/json
+
+In the body of the request, include the following parameters:
+
+    {
+      "client_id": "CnfhRqnszqIpPnV0OnbXLRnyjZyOpfnM",
+      "client_secret": "AeGJnmPAbLEJRDhs4TvTSF1GeV_V7HhdhlmTLeZOULsMbcnmfoFQwQIJK8KemOBu",
+      "audience": "https://car-service.example.com",
+      "grant_type": "client_credentials"
+    }
+
+If the request is successful, you will receive a response containing the Bearer Token. Example response:
+
+    {
+      "access_token": "YOUR_ACCESS_TOKEN",
+      "expires_in": 86400,
+      "token_type": "Bearer"
+    }
+
+Copy the value from the `access_token` field — this is your Bearer Token.
 	
 ## Endpoints
 
@@ -74,6 +103,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	POST http://localhost:8080/api/v1/cars
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"make": "LADA",
@@ -91,6 +121,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	PUT http://localhost:8080/api/v1/cars/{1}
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"make": "LADA",
@@ -106,6 +137,7 @@ By default, the application is available at the following address:
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/cars/1
+	Authorization: Bearer your_token_here
 	
 ### 6. Get Filtered Makes
 - **URL**: `/api/v1/makes`
@@ -136,6 +168,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	POST http://localhost:8080/api/v1/makes
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "LADA"
@@ -149,6 +182,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	PUT http://localhost:8080/api/v1/makes/1
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "LADA"
@@ -161,6 +195,7 @@ By default, the application is available at the following address:
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/makes/1
+	Authorization: Bearer your_token_here
 	
 ### 11. Get Filtered Models
 - **URL**: `/api/v1/models`
@@ -191,6 +226,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	POST http://localhost:8080/api/v1/models
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "KALINA"
@@ -204,6 +240,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	PUT http://localhost:8080/api/v1/models/1
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "KALINA"
@@ -216,6 +253,7 @@ By default, the application is available at the following address:
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/models/1
+	Authorization: Bearer your_token_here
 	
 ### 16. Get Filtered Categories
 - **URL**: `/api/v1/categories`
@@ -246,6 +284,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	POST http://localhost:8080/api/v1/categories
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "Sedan"
@@ -259,6 +298,7 @@ By default, the application is available at the following address:
 #### Example Request:
 	PUT http://localhost:8080/api/v1/categories/1
 	Content-Type: application/json
+	Authorization: Bearer your_token_here
 
 	{
     	"name": "Sedan"
@@ -271,3 +311,5 @@ By default, the application is available at the following address:
 
 #### Example Request:
 	DELETE http://localhost:8080/api/v1/categories/1
+	Authorization: Bearer your_token_here
+	
