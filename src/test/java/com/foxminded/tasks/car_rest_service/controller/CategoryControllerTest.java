@@ -13,8 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -83,7 +83,7 @@ class CategoryControllerTest {
 		when(service.findById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/categories/{id}", id))
-        .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        .andExpect(MockMvcResultMatchers.status().isNotFound());
         
         verify(service, times(1)).findById(anyLong());
 	}
@@ -110,9 +110,13 @@ class CategoryControllerTest {
 	@Test
 	void createCategory_InvalidCategory_ReturnsBadRequest() throws Exception {
 	
+		String upsertCategoryDtoJson = "{\"name\": \"Sedan\"}";
+		
 		when(service.createCategory(any(UpsertCategoryDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/categories")
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content(upsertCategoryDtoJson)
         		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
@@ -138,15 +142,33 @@ class CategoryControllerTest {
 	}
 	
 	@Test
-	void updateCategory_InvalidCategory_ReturnsBadRequest() throws Exception {
+	void updateCategory_InvalidCategoryId_ReturnsNotFound() throws Exception {
 		
 		Long id = 1L;
+		String upsertCategoryDtoJson = "{\"name\": \"Sedan\"}";
+		
+		when(service.updateCategory(anyLong(), any(UpsertCategoryDTO.class))).thenThrow(new EntityNotFoundException());
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id)
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content(upsertCategoryDtoJson)
+        		.with(csrf()))
+        .andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	
+	@Test
+	void updateCategory_InvalidCategoryData_ReturnsBadRequest() throws Exception {
+		
+		Long id = 1L;
+		String upsertCategoryDtoJson = "{\"name\": \"Sedan\"}";
 		
 		when(service.updateCategory(anyLong(), any(UpsertCategoryDTO.class))).thenThrow(new IllegalArgumentException());
 		
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id)
-        		.with(csrf()))
-        .andExpect(MockMvcResultMatchers.status().isBadRequest());
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/categories/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(upsertCategoryDtoJson)
+				.with(csrf()))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	@Test
@@ -164,15 +186,15 @@ class CategoryControllerTest {
 	}
 	
 	@Test
-	void deleteCategory_InvalidId_ReturnsBadRequest() throws Exception {
+	void deleteCategory_InvalidId_ReturnsNotFound() throws Exception {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(carService).deleteCategoryAndAssociations(anyLong());
+		doThrow(new EntityNotFoundException()).when(carService).deleteCategoryAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/categories/{id}", id)
 				.with(csrf()))
-		.andExpect(MockMvcResultMatchers.status().isBadRequest());
+		.andExpect(MockMvcResultMatchers.status().isNotFound());
 		
 		verify(carService, times(1)).deleteCategoryAndAssociations(anyLong());
 	}

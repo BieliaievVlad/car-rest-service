@@ -21,7 +21,15 @@ import com.foxminded.tasks.car_rest_service.dto.category.CategoryDTO;
 import com.foxminded.tasks.car_rest_service.dto.category.UpsertCategoryDTO;
 import com.foxminded.tasks.car_rest_service.service.CarService;
 import com.foxminded.tasks.car_rest_service.service.CategoryService;
-import jakarta.persistence.EntityNotFoundException;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("api/v1")
@@ -37,6 +45,12 @@ public class CategoryController {
 		this.carService = carService;
 	}
 	
+    @Operation(summary = "List Categories with filtering options for name")
+    @ApiResponses(value = { 
+    		  @ApiResponse(responseCode = "200", description = "List of Categories successfully fetched", 
+    		    content = { @Content(mediaType = "application/json", 
+    		      schema = @Schema(implementation = CategoryDTO.class)) })
+    		  })
 	@GetMapping("/categories")
 	public Page<CategoryDTO> getFilteredCategories(@RequestParam(required = false) String name,
 								 				@RequestParam(defaultValue = "0") int page,
@@ -46,65 +60,79 @@ public class CategoryController {
         return service.filterCategories(name, pageable);
 	}
 	
+    @Operation(summary = "Find a Category with given id")
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "200", description = "Category found", 
+    					 content = { @Content(mediaType = "application/json",
+    					 schema = @Schema(implementation = CategoryDTO.class))
+    		}),
+    		@ApiResponse(responseCode = "404", description = "Category not found", content = @Content)
+    })
 	@GetMapping("/categories/{id}")
-	public ResponseEntity<CategoryDTO> getCategory(@PathVariable Long id) {
-		
-		try {
-			CategoryDTO categoryDto = service.findById(id);
-			return new ResponseEntity<>(categoryDto, HttpStatus.OK);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			
-		}catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public ResponseEntity<CategoryDTO> getCategory(@Parameter(description = "ID of Category to be searched")
+												   @PathVariable Long id) {
+
+		CategoryDTO categoryDto = service.findById(id);
+		return new ResponseEntity<>(categoryDto, HttpStatus.OK);
 	}
 	
+    @Operation(summary = "Create a new Category", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "201", description = "Category created and added to DataBase",
+    					 content = { @Content(mediaType = "application/json",
+    					 schema = @Schema(implementation = CategoryDTO.class))
+    					 }),
+    		@ApiResponse(responseCode = "400", description = "Category with given name is already exists"),
+    		@ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
 	@PostMapping("/categories")
-	public ResponseEntity<CategoryDTO> createCategory(@RequestBody UpsertCategoryDTO createCategoryDto) {
+	public ResponseEntity<CategoryDTO> createCategory(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+															description = "Category to create", required = true, 
+															content = @Content(mediaType = "application/json", 
+															schema = @Schema(implementation = UpsertCategoryDTO.class),
+															examples = @ExampleObject(value = "{\"name\": \"Sedan\"}")))
+													  @RequestBody UpsertCategoryDTO createCategoryDto) {
 
-		try {
-			CategoryDTO categoryDto = service.createCategory(createCategoryDto);
-			return new ResponseEntity<>(categoryDto, HttpStatus.CREATED);
-			
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		CategoryDTO categoryDto = service.createCategory(createCategoryDto);
+		return new ResponseEntity<>(categoryDto, HttpStatus.CREATED);
 	}
 	
+    @Operation(summary = "Update an existing Category", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "200", description = "Category updated",
+    				content = { @Content(mediaType = "application/json",
+    				schema = @Schema(implementation = CategoryDTO.class))
+    				}),
+    		@ApiResponse(responseCode = "400", description = "Category data is not valid"),
+    		@ApiResponse(responseCode = "401", description = "Unauthorized access"),
+    		@ApiResponse(responseCode = "404", description = "Unable to update. Category not found", content = @Content)
+    })
 	@PutMapping("/categories/{id}")
-	public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody UpsertCategoryDTO updateCategoryDto) {
-		
-		try {
-			CategoryDTO categoryDto = service.updateCategory(id, updateCategoryDto);
-			return new ResponseEntity<>(categoryDto, HttpStatus.OK);
-			
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public ResponseEntity<CategoryDTO> updateCategory(@Parameter(description = "ID of Category to be updated")
+													  @PathVariable Long id, 
+													  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+																description = "Category data to update", required = true, 
+																content = @Content(mediaType = "application/json", 
+																schema = @Schema(implementation = UpsertCategoryDTO.class),
+																examples = @ExampleObject(value = "{\"name\": \"Sedan\"}")))
+													  @RequestBody UpsertCategoryDTO updateCategoryDto) {
+
+		CategoryDTO categoryDto = service.updateCategory(id, updateCategoryDto);
+		return new ResponseEntity<>(categoryDto, HttpStatus.OK);
 	}
 	
+    @Operation(summary = "Delete an existing Category", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "204", description = "Category deleted"),
+    		@ApiResponse(responseCode = "401", description = "Unauthorized access"),
+    		@ApiResponse(responseCode = "404", description = "Unable to delete. Category not found")
+    })
 	@DeleteMapping("/categories/{id}")
-	public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteCategory(@Parameter(description = "ID of Category to be deleted")
+											   @PathVariable Long id) {
 
-		try {
-			carService.deleteCategoryAndAssociations(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		carService.deleteCategoryAndAssociations(id);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 	
-
 }

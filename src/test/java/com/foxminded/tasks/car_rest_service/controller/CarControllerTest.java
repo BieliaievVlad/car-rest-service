@@ -15,8 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -118,9 +118,13 @@ class CarControllerTest {
 	@Test
 	void createCar_InvalidCar_ReturnsBadRequest() throws Exception {
 		
+		String createCarDtoJson = "{\"make\": \"LADA\",\"model\": \"KALINA\",\"category\": \"Sedan\",\"year\": \"2026\",\"objectId\": \"\"}";
+		
 		when(service.createCar(any(CreateCarDTO.class))).thenThrow(new IllegalArgumentException());
 		
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/cars")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(createCarDtoJson)
 				.with(csrf()))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
@@ -150,15 +154,33 @@ class CarControllerTest {
 	}
 	
 	@Test
-	void updateCar_InvalidCar_ReturnsBadRequest() throws Exception {
+	void updateCar_InvalidCarData_ReturnsBadRequest() throws Exception {
 		
 		Long id = 1L;
+		String updateCarDtoJson = "{\"make\": \"LADA\",\"model\": \"KALINA\",\"category\": \"Sedan\",\"year\": \"2026\",\"objectId\": \"\"}";
 		
 		when(service.updateCar(anyLong(), any(UpdateCarDTO.class))).thenThrow(new IllegalArgumentException());
 		
 		mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/cars/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(updateCarDtoJson)
 				.with(csrf()))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	void updateCar_InvalidCarId_ReturnsNotFound() throws Exception {
+		
+		Long id = 1L;
+		String updateCarDtoJson = "{\"make\": \"LADA\",\"model\": \"KALINA\",\"category\": \"Sedan\",\"year\": \"2026\",\"objectId\": \"\"}";
+		
+		when(service.updateCar(anyLong(), any(UpdateCarDTO.class))).thenThrow(new EntityNotFoundException());
+		
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/cars/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(updateCarDtoJson)
+				.with(csrf()))
+		.andExpect(MockMvcResultMatchers.status().isNotFound());
 	}
 
 	@Test
@@ -176,15 +198,15 @@ class CarControllerTest {
 	}
 	
 	@Test
-	void delete_InvalidId_ReturnsBadRequest() throws Exception {
+	void delete_InvalidId_ReturnsNotFound() throws Exception {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(service).delete(anyLong());
+		doThrow(new EntityNotFoundException()).when(service).delete(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/cars/{id}", id)
 				.with(csrf()))
-		.andExpect(MockMvcResultMatchers.status().isBadRequest());
+		.andExpect(MockMvcResultMatchers.status().isNotFound());
 		
 		verify(service, times(1)).delete(anyLong());
 	}

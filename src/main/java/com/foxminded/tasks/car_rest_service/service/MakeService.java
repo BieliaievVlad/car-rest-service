@@ -58,7 +58,7 @@ public class MakeService {
 			
 		} else {
 			logger.error("Make with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Make is not found");
 		}	
 	}
 	
@@ -71,7 +71,8 @@ public class MakeService {
 			
 		} else {
 			logger.error("Make with name {} is already exists.", createMakeDto.getName());
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Make Name: " + createMakeDto.getName()
+			 												 + " Make with this name is already exists");
 		}	
 	}
 	
@@ -89,7 +90,7 @@ public class MakeService {
 			
 		} else {
 			logger.error("Make with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Make is not found");
 		}
 	}
 	

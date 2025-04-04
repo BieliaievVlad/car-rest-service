@@ -58,7 +58,7 @@ public class ModelService {
 			
 		} else {
 			logger.error("Model with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Model is not found");
 		}	
 	}
 	
@@ -71,7 +71,8 @@ public class ModelService {
 			
 		} else {
 			logger.error("Model with name {} is already exists.", createModelDto.getName());
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Model Name: " + createModelDto.getName()
+			 												  + " Model with this name is already exists");
 		}	
 	}
 	
@@ -89,7 +90,7 @@ public class ModelService {
 			
 		} else {
 			logger.error("Model with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Model is not found");
 		}
 	}
 	

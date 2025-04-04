@@ -14,8 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -83,7 +83,7 @@ class MakeControllerTest {
 		when(service.findById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/makes/{id}", id))
-        .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        .andExpect(MockMvcResultMatchers.status().isNotFound());
         
         verify(service, times(1)).findById(anyLong());
 	}
@@ -110,9 +110,13 @@ class MakeControllerTest {
 	@Test
 	void createMake_InvalidMake_ReturnsBadRequest() throws Exception {
 	
+		String upsertMakeDtoJson = "{\"name\": \"LADA\"}";
+		
 		when(service.createMake(any(UpsertMakeDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/makes")
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content(upsertMakeDtoJson)
         		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
@@ -138,15 +142,33 @@ class MakeControllerTest {
 	}
 	
 	@Test
-	void updateMake_InvalidMake_ReturnsBadRequest() throws Exception {
+	void updateMake_InvalidMakeId_ReturnsNotFound() throws Exception {
 		
 		Long id = 1L;
+		String upsertMakeDtoJson = "{\"name\": \"LADA\"}";
+		
+		when(service.updateMake(anyLong(), any(UpsertMakeDTO.class))).thenThrow(new EntityNotFoundException());
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/makes/{id}", id)
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content(upsertMakeDtoJson)
+        		.with(csrf()))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	
+	@Test
+	void updateMake_InvalidMakeData_ReturnsBadRequest() throws Exception {
+		
+		Long id = 1L;
+		String upsertMakeDtoJson = "{\"name\": \"LADA\"}";
 		
 		when(service.updateMake(anyLong(), any(UpsertMakeDTO.class))).thenThrow(new IllegalArgumentException());
 		
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/makes/{id}", id)
-        		.with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/makes/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(upsertMakeDtoJson)
+				.with(csrf()))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	@Test
@@ -164,15 +186,15 @@ class MakeControllerTest {
 	}
 	
 	@Test
-	void deleteMake_InvalidId_ReturnsBadRequest() throws Exception {
+	void deleteMake_InvalidId_ReturnsNotFound() throws Exception {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(carService).deleteMakeAndAssociations(anyLong());
+		doThrow(new EntityNotFoundException()).when(carService).deleteMakeAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/makes/{id}", id)
 				.with(csrf()))
-		.andExpect(MockMvcResultMatchers.status().isBadRequest());
+		.andExpect(MockMvcResultMatchers.status().isNotFound());
 		
 		verify(carService, times(1)).deleteMakeAndAssociations(anyLong());
 	}
