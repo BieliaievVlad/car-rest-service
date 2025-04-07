@@ -40,6 +40,19 @@ By default, the application is available at the following address:
 
 	http://localhost:7000
 	
+### Access Swagger UI
+Once the application is running, you can access the Swagger UI by navigating to the following URL in your browser:
+
+- By default:
+
+	http://localhost:7000/swagger-ui/index.html
+	
+- Or, if using a different port (e.g., 8088):
+
+	http://localhost:8088/swagger-ui/index.html
+	
+This will open the Swagger documentation where you can explore and test the API endpoints.
+	
 ## Obtaining the Bearer Token
 
 Make a **POST** request to the following URL:
