@@ -23,7 +23,11 @@ import com.foxminded.tasks.car_rest_service.dto.car.CreateCarDTO;
 import com.foxminded.tasks.car_rest_service.dto.car.UpdateCarDTO;
 import com.foxminded.tasks.car_rest_service.service.CarService;
 
-import jakarta.persistence.EntityNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.*;
+import io.swagger.v3.oas.annotations.responses.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement; 
 
 @RestController
 @RequestMapping("/api/v1")
@@ -36,6 +40,12 @@ public class CarController {
         this.service = service;
     }
 
+    @Operation(summary = "List Cars with filtering options for make, model, category, and year")
+    @ApiResponses(value = { 
+    		  @ApiResponse(responseCode = "200", description = "List of Cars successfully fetched", 
+    		    content = { @Content(mediaType = "application/json", 
+    		      schema = @Schema(implementation = CarListItemDTO.class)) })
+    		  })
     @GetMapping("/cars")
     public Page<CarListItemDTO> getFilteredCars(
             @RequestParam(required = false) String makeName,
@@ -49,64 +59,79 @@ public class CarController {
         return service.filterCars(makeName, modelName, categoryName, year, pageable);
     }
     
+    @Operation(summary = "Find a Car with given id")
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "200", description = "Car found", 
+    					 content = { @Content(mediaType = "application/json",
+    					 schema = @Schema(implementation = CarDTO.class))
+    		}),
+    		@ApiResponse(responseCode = "404", description = "Car not found", content = @Content)
+    })
     @GetMapping("/cars/{id}")
-    public ResponseEntity<CarDTO> getCar(@PathVariable Long id) {
-    	
-    	try {
-    		CarDTO carDto = service.findCarById(id);
-    		return new ResponseEntity<>(carDto, HttpStatus.OK);
-    		
-    	} catch (EntityNotFoundException e){	
-    		return new ResponseEntity<>(HttpStatus.NOT_FOUND); 
-    		
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+    public ResponseEntity<CarDTO> getCar(@Parameter(description = "ID of Car to be searched")
+    									 @PathVariable Long id) {
+
+    	CarDTO carDto = service.findCarById(id);
+    	return new ResponseEntity<>(carDto, HttpStatus.OK);
     }
     
+    @Operation(summary = "Create a new Car", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "201", description = "Car created and added to DataBase",
+    					 content = { @Content(mediaType = "application/json",
+    					 schema = @Schema(implementation = CarDTO.class))
+    					 }),
+    		@ApiResponse(responseCode = "400", description = "Car data is not valid"),
+    		@ApiResponse(responseCode = "401", description = "Unauthorized access"),
+    })
 	@PostMapping("/cars")
-	public ResponseEntity<CarDTO> createCar(@RequestBody CreateCarDTO createCarDto) {
+	public ResponseEntity<CarDTO> createCar(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+			description = "Car to create", required = true, 
+			content = @Content(mediaType = "application/json", 
+			schema = @Schema(implementation = CreateCarDTO.class),
+			examples = @ExampleObject(value = 
+					"{\"make\": \"LADA\",\"model\": \"KALINA\",\"category\": \"Sedan\",\"year\": \"2026\",\"objectId\": \"\"}")))
+			@RequestBody CreateCarDTO createCarDto) {
 
-		try {
-			CarDTO carDto = service.createCar(createCarDto);
-			return new ResponseEntity<>(carDto, HttpStatus.CREATED);
-			
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		CarDTO carDto = service.createCar(createCarDto);
+		return new ResponseEntity<>(carDto, HttpStatus.CREATED);
 	}
 	
+    @Operation(summary = "Update an existing Car", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "200", description = "Car updated",
+    				content = { @Content(mediaType = "application/json",
+    				schema = @Schema(implementation = CarDTO.class))
+    				}),
+    		@ApiResponse(responseCode = "400", description = "Car data is not valid"),
+    		@ApiResponse(responseCode = "401", description = "Unauthorized access"),
+    		@ApiResponse(responseCode = "404", description = "Unable to update. Car not found", content = @Content)
+    })
 	@PutMapping("/cars/{id}")
-	public ResponseEntity<CarDTO> updateCar(@PathVariable Long id, @RequestBody UpdateCarDTO updateCarDto) {
-		
-		try {
-			CarDTO carDto = service.updateCar(id, updateCarDto);
-			return new ResponseEntity<>(carDto, HttpStatus.OK);
-			
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public ResponseEntity<CarDTO> updateCar(@Parameter(description = "ID of Car to be updated") @PathVariable Long id, 
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(
+				description = "Car data to update", required = true, 
+				content = @Content(mediaType = "application/json", 
+				schema = @Schema(implementation = UpdateCarDTO.class),
+				examples = @ExampleObject(value = 
+					"{\"make\": \"LADA\",\"model\": \"KALINA\",\"category\": \"Sedan\",\"year\": \"2026\"}")))
+				@RequestBody UpdateCarDTO updateCarDto) {
+
+		CarDTO carDto = service.updateCar(id, updateCarDto);
+		return new ResponseEntity<>(carDto, HttpStatus.OK);
 	}
 	
+    @Operation(summary = "Delete an existing Car", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+    		@ApiResponse(responseCode = "204", description = "Car deleted"),
+    		@ApiResponse(responseCode = "401", description = "Unauthorized access"),
+    		@ApiResponse(responseCode = "404", description = "Unable to delete. Car not found")
+    })
 	@DeleteMapping("/cars/{id}")
-	public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
-		
-		try {
+	public ResponseEntity<Void> deleteCar(@Parameter(description = "ID of Car to be deleted")
+										  @PathVariable Long id) {
 
-			service.delete(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		service.delete(id);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }

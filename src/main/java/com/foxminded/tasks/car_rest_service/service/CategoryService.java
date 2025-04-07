@@ -58,7 +58,7 @@ public class CategoryService {
 			
 		} else {
 			logger.error("Category with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Category is not found");
 		}	
 	}
 	
@@ -72,7 +72,8 @@ public class CategoryService {
 			
 		} else {
 			logger.error("Category with name {} is already exists.", createCategoryDto.getName());
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Category Name: " + createCategoryDto.getName()
+																 + " Category with this name is already exists");
 		}	
 	}
 	
@@ -90,7 +91,7 @@ public class CategoryService {
 			
 		} else {
 			logger.error("Category with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Category is not found");
 		}
 	}
 	

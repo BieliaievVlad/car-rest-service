@@ -78,9 +78,8 @@ public class CarService {
 			
 		} else {
 			logger.error("Car with id {} is not found.", id);
-			throw new EntityNotFoundException();
-		}
-		
+			throw new EntityNotFoundException("ID: " + id + " Car not found.");
+		}	
 	}
 	
 	public CarDTO createCar(CreateCarDTO createCarDto) {
@@ -130,7 +129,7 @@ public class CarService {
 			
 		} else {
 			logger.error("Car with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Car not found.");
 		}
 
 	}
@@ -144,7 +143,7 @@ public class CarService {
 			
 		} else {
 			logger.error("Car with id {} is not found.", id);
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("ID: " + id + " Car not found.");
 		}	
 	}
 

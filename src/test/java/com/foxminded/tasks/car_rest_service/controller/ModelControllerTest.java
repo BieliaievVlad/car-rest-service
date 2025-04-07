@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -84,7 +85,7 @@ class ModelControllerTest {
 		when(service.findById(anyLong())).thenThrow(new EntityNotFoundException());
 		
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/models/{id}", id))
-        .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        .andExpect(MockMvcResultMatchers.status().isNotFound());
         
         verify(service, times(1)).findById(anyLong());
 	}
@@ -111,9 +112,13 @@ class ModelControllerTest {
 	@Test
 	void createModel_InvalidModel_ReturnsBadRequest() throws Exception {
 	
+		String upsertModelDtoJson = "{\"name\": \"KALINA\"}";
+		
 		when(service.createModel(any(UpsertModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/models")
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content(upsertModelDtoJson)
         		.with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
@@ -139,15 +144,33 @@ class ModelControllerTest {
 	}
 	
 	@Test
-	void updateModel_InvalidModel_ReturnsBadRequest() throws Exception {
+	void updateModel_InvalidModelId_ReturnsNotFound() throws Exception {
 		
 		Long id = 1L;
+		String upsertModelDtoJson = "{\"name\": \"KALINA\"}";
+		
+		when(service.updateModel(anyLong(), any(UpsertModelDTO.class))).thenThrow(new EntityNotFoundException());
+		
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id)
+        		.contentType(MediaType.APPLICATION_JSON)
+        		.content(upsertModelDtoJson)
+        		.with(csrf()))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	
+	@Test
+	void updateModel_InvalidModelData_ReturnsBadRequest() throws Exception {
+		
+		Long id = 1L;
+		String upsertModelDtoJson = "{\"name\": \"KALINA\"}";
 		
 		when(service.updateModel(anyLong(), any(UpsertModelDTO.class))).thenThrow(new IllegalArgumentException());
 		
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id)
-        		.with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/models/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(upsertModelDtoJson)
+				.with(csrf()))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 
 	@Test
@@ -165,15 +188,15 @@ class ModelControllerTest {
 	}
 	
 	@Test
-	void deleteModel_InvalidId_ReturnsBadRequest() throws Exception {
+	void deleteModel_InvalidId_ReturnsnotFound() throws Exception {
 		
 		Long id = 1L;
 		
-		doThrow(new IllegalArgumentException()).when(carService).deleteModelAndAssociations(anyLong());
+		doThrow(new EntityNotFoundException()).when(carService).deleteModelAndAssociations(anyLong());
 		
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/models/{id}", id)
 				.with(csrf()))
-		.andExpect(MockMvcResultMatchers.status().isBadRequest());
+		.andExpect(MockMvcResultMatchers.status().isNotFound());
 		
 		verify(carService, times(1)).deleteModelAndAssociations(anyLong());
 	}
