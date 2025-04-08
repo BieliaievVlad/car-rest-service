@@ -1,0 +1,30 @@
+version: '1'
+
+services:
+  app:
+    image: 'car-service-app:latest'
+    build:
+      context: .
+    container_name: app
+    depends_on:
+      - db
+    ports:
+    - "7000:7000"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/car_service
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_FLYWAY_URL=jdbc:postgresql://db:5432/car_service
+      - SPRING_FLYWAY_USER=postgres
+      - SPRING_FLYWAY_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  db:
+    image: 'postgres:14.6'
+    container_name: db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=car_service
+    ports:
+      - "5432:5432"

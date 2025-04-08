@@ -40,7 +40,7 @@ By default, the application is available at the following address:
 
 	http://localhost:7000
 	
-### Access Swagger UI
+## Access Swagger UI
 Once the application is running, you can access the Swagger UI by navigating to the following URL in your browser:
 
 - By default:
