@@ -1,5 +1,6 @@
 # Car Rest Service
-The application is designed to interact with a Postgres database.
+A Spring Boot-based REST API for managing car data.
+Includes authentication with Spring Security & OAuth2, PostgreSQL integration, Flyway migrations and OpenAPI documentation.
 
 ## Requirements
 
