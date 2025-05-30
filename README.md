@@ -6,6 +6,8 @@ The application is designed to interact with a Postgres database.
 - Java 17 (or later version)
 - Maven
 - PostgreSQL
+- Docker
+- Docker Compose
 
 ## Build
 1. Use the following command from the root folder of the project:
@@ -31,7 +33,9 @@ The application is designed to interact with a Postgres database.
 	spring.flyway.password=123456
 
 ## Running the Application
-1. Run the application, specifying database connection parameters through the command line from the 'target' folder if needed.
+
+### Option 1. 
+Run the application, specifying database connection parameters through the command line from the 'target' folder if needed.
 For example:
 
 	java -Dspring.datasource.username=postgres -Dspring.datasource.password=postgres -Dspring.flyway.user=postgres -Dspring.flyway.password=postgres -Dspring.config.name=application -Dspring.datasource.url=jdbc:postgresql://localhost:5432/car_service_vb -Dspring.flyway.url=jdbc:postgresql://localhost:5432/car_service_vb -Dserver.port=8088 -jar target/car-rest-service-0.0.1-SNAPSHOT.jar
@@ -39,8 +43,43 @@ For example:
 By default, the application is available at the following address:
 
 	http://localhost:7000
+
+### Option 2.
+Run the following command from root folder:
+
+	docker build -t car-service .
 	
-### Access Swagger UI
+Where `car-service` is an image name.
+It creates docker image. To run the container use following command:
+
+	docker run --env-file .env -p 7000:7000 car_service
+	
+`-p 7000:7000` makes application available at following address:
+
+	http://localhost:7000
+
+To stop the container use following command:
+
+	docker stop <container_id>	
+	
+Replace `<container_id>` with actual container ID. Find it running following command:
+
+	docker ps
+	
+### Option 3. 
+Run the following command from root folder to start the application:
+
+	docker-compose up
+	
+By default, the application is available at the following address:
+
+	http://localhost:7000
+	
+To stop the containers:
+	
+	docker-compose down
+	
+## Access Swagger UI
 Once the application is running, you can access the Swagger UI by navigating to the following URL in your browser:
 
 - By default:
