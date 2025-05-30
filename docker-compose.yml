@@ -1,4 +1,4 @@
-version: '1'
+version: '3'
 
 services:
   app:
@@ -9,22 +9,24 @@ services:
     depends_on:
       - db
     ports:
-    - "7000:7000"
+      - "${APP_PORT}:${APP_PORT}"  
+    env_file:
+      - .env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/car_service
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_FLYWAY_URL=jdbc:postgresql://db:5432/car_service
-      - SPRING_FLYWAY_USER=postgres
-      - SPRING_FLYWAY_PASSWORD=123456
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST_DOCKER}:${DB_PORT}/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASS}
+      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST_DOCKER}:${DB_PORT}/${DB_NAME}
+      - SPRING_FLYWAY_USER=${DB_USER}
+      - SPRING_FLYWAY_PASSWORD=${DB_PASS}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
   db:
     image: 'postgres:14.6'
     container_name: db
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=car_service
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
