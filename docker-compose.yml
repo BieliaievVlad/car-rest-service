@@ -5,6 +5,8 @@ services:
     image: 'car-service-app:latest'
     build:
       context: .
+      args:
+        SPRING_PROFILE: docker
     container_name: app
     depends_on:
       - db
