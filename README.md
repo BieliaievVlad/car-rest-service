@@ -53,7 +53,7 @@ Run the following command from root folder:
 Where `car-service` is an image name.
 It creates docker image. To run the container use following command:
 
-	docker run --env-file .env -p 7000:7000 car_service
+	docker run --env-file .env -p 7000:7000 car-service
 	
 `-p 7000:7000` makes application available at following address:
 
