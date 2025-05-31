@@ -32,7 +32,7 @@ public class GlobalControllerExceptionHandler {
     
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleException(RuntimeException ex) {
+    public ResponseEntity<String> handleException(Exception ex) {
     	return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
