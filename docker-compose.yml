@@ -9,17 +9,9 @@ services:
     depends_on:
       - db
     ports:
-      - "${APP_PORT}:${APP_PORT}"  
+      - "${APP_PORT}:${APP_PORT}"
     env_file:
       - .env
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST_DOCKER}:${DB_PORT}/${DB_NAME}
-      - SPRING_DATASOURCE_USERNAME=${DB_USER}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASS}
-      - SPRING_FLYWAY_URL=jdbc:postgresql://${DB_HOST_DOCKER}:${DB_PORT}/${DB_NAME}
-      - SPRING_FLYWAY_USER=${DB_USER}
-      - SPRING_FLYWAY_PASSWORD=${DB_PASS}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
   db:
     image: 'postgres:14.6'
