@@ -44,30 +44,8 @@ For example:
 By default, the application is available at the following address:
 
 	http://localhost:7000
-
-### Option 2.
-Run the following command from root folder:
-
-	docker build -t car-service .
 	
-Where `car-service` is an image name.
-It creates docker image. To run the container use following command:
-
-	docker run --env-file .env -p 7000:7000 car-service
-	
-`-p 7000:7000` makes application available at following address:
-
-	http://localhost:7000
-
-To stop the container use following command:
-
-	docker stop <container_id>	
-	
-Replace `<container_id>` with actual container ID. Find it running following command:
-
-	docker ps
-	
-### Option 3. 
+### Option 2. 
 Run the following command from root folder to start the application:
 
 	docker-compose up
